@@ -1,6 +1,8 @@
 package com.example.socialnetworkbe.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+
 
 import java.io.Serializable;
 import java.util.Set;
@@ -14,7 +16,8 @@ public class User implements Serializable {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username;
+    @Email
+    private String email;
 
     @Column(nullable = false)
     private String password;
@@ -22,10 +25,12 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String confirmPassword;
 
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     // Thêm trường active để theo dõi trạng thái tài khoản
-    private boolean active = true;
+    private boolean active = false;
+    private String verificationToken;
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -33,17 +38,17 @@ public class User implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
-    public User(String username, String password, String confirmPassword, Set<Role> roles, boolean active) {
-        this.username = username;
+    public User(String email, String password, String confirmPassword, Set<Role> roles, boolean active) {
+        this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.roles = roles;
         this.active = active;
     }
 
-    public User(Long id, String username, String password, String confirmPassword, boolean enabled, Set<Role> roles, boolean active) {
+    public User(Long id, String email, String password, String confirmPassword, boolean enabled, Set<Role> roles, boolean active) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.enabled = enabled;
@@ -62,12 +67,12 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -109,5 +114,13 @@ public class User implements Serializable {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
     }
 }

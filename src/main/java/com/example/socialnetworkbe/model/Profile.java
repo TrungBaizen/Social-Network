@@ -25,12 +25,20 @@ public class Profile {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    private String firstName;
+    private String lastName;
     @Column(columnDefinition = "LONGTEXT")
     private String avatar;
     @Column(columnDefinition = "TEXT")
     private String description;
-    @Past(message = "Ngày sinh phải trong quá khứ")
+    @Past(message = "Ngày sinh phải ngày trong quá khứ")
     private LocalDate birthDate;
+    @Column(name = "hometown")
+    private String hometown;
+    @Column(name = "current_location")
+    private String currentLocation;
+    @Column(name = "occupation")
+    private String occupation;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

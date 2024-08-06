@@ -21,19 +21,22 @@ import java.io.IOException;
 // mọi request đi qua class này đầu tiên
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
+    private final UserService userService;
 
     @Autowired
-    private UserService userService = new UserServiceImpl();
+    public JwtAuthenticationFilter(JwtService jwtService, UserService userService) {
+        this.jwtService = jwtService;
+        this.userService = userService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = getJwtFromRequest(request);
             if (jwt != null && jwtService.validateJwtToken(jwt)) {
-                String username = jwtService.getUserNameFromJwtToken(jwt);
-                UserDetails userDetails = userService.loadUserByUsername(username);
+                String email = jwtService.getEmailFromJwtToken(jwt);
+                UserDetails userDetails = userService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -49,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.replace("Bearer ", "");
         }
-
         return null;
     }
 }
