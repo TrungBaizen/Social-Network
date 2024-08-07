@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
 
         // Gửi email xác thực
-        String verificationLink = "http://localhost:8080/verify?token=" + user.getVerificationToken();
+        String verificationLink = "http://localhost:3000/successnotification?token=" + user.getVerificationToken();
 
         emailService.sendEmail(
                 user.getEmail(),

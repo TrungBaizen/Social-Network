@@ -1,6 +1,7 @@
 package com.example.socialnetworkbe.model;
 
 
+import com.example.socialnetworkbe.enums.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "profiles")
@@ -25,10 +27,14 @@ public class Profile {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+    @Column(name = "last_name", nullable = false)
     private String lastName;
-    @Column(columnDefinition = "LONGTEXT")
-    private String avatar;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileImage> profileImages;
     @Column(columnDefinition = "TEXT")
     private String description;
     @Past(message = "Ngày sinh phải ngày trong quá khứ")
@@ -52,5 +58,6 @@ public class Profile {
     public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 
 }

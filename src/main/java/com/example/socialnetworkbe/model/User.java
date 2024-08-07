@@ -2,6 +2,7 @@ package com.example.socialnetworkbe.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 
 
 import java.io.Serializable;
@@ -16,7 +17,7 @@ public class User implements Serializable {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @Email
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@gmail\\.com$",message = "Sai định dạng mail")
     private String email;
 
     @Column(nullable = false)
