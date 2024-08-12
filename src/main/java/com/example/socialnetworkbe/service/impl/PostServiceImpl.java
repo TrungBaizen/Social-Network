@@ -26,10 +26,11 @@ public class PostServiceImpl implements PostService {
     private final LikeService likeService;
     private final CommentService commentService;
     private final UserService userService;
+    private final ProfileService profileService;
 
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostImageService postImageService, LikeService likeService, CommentService commentService, UserService userService) {
+    public PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostImageService postImageService, LikeService likeService, CommentService commentService, UserService userService, ProfileService profileService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.postImageService = postImageService;
@@ -37,6 +38,7 @@ public class PostServiceImpl implements PostService {
         this.commentService = commentService;
 
         this.userService = userService;
+        this.profileService = profileService;
     }
 
     @Override
@@ -150,7 +152,7 @@ public class PostServiceImpl implements PostService {
         Map<Long, List<PostImageDTO>> postImageDTOsMapPostId = postImageDTOs.stream().collect(Collectors.groupingBy(PostImageDTO::getPostId));
         List<CommentImageDTO> commentsImageDTOs = commentService.findImageAllByPostIdIn(postIds).stream().map(CommentImageDTO::new).toList();
         Map<Long, List<CommentImageDTO>> commentsImageDTOMapPostId = commentsImageDTOs.stream().collect(Collectors.groupingBy(CommentImageDTO::getCommentId));
-        List<CommentDTO> commentDTOS = commentService.findAllByPostIdIn(postIds).stream().map(c -> new CommentDTO(c, commentsImageDTOMapPostId)).toList();
+        List<CommentDTO> commentDTOS = commentService.findAllByPostIdIn(postIds).stream().map(c -> new CommentDTO(c, profileService.findByUserId(c.getUser().getId()), commentsImageDTOMapPostId)).toList();
         /*Xu ly list comment con*/
         Map<Long, List<CommentDTO>> commentChildrenDtoMapPostId = commentDTOS.stream()
                 .filter(c -> Objects.nonNull(c.getParentCommentId()))
@@ -158,9 +160,9 @@ public class PostServiceImpl implements PostService {
         commentDTOS.stream().filter(c -> commentChildrenDtoMapPostId.containsKey(c.getId())).forEach(c -> c.setCommentChildren(commentChildrenDtoMapPostId.get(c.getId())));
 
         Map<Long, List<CommentDTO>> commentParentDtoMapPostId = commentDTOS.stream().filter(c -> Objects.isNull(c.getParentCommentId())).collect(Collectors.groupingBy(CommentDTO::getPostId));
-        List<LikeDTO> likeDTOs = likeService.findAllByPostIdIn(postIds).stream().map(LikeDTO::new).toList();
+        List<LikeDTO> likeDTOs = likeService.findAllByPostIdIn(postIds).stream().map(l -> new LikeDTO(l, profileService.findByUserId(l.getUser().getId()))).toList();
         Map<Long, List<LikeDTO>> likeDTOMapPostId = likeDTOs.stream().collect(Collectors.groupingBy(LikeDTO::getPostId));
-        return posts.stream().map(p -> new PostLikeCommentDTO(p, postImageDTOsMapPostId.get(p.getId()), likeDTOMapPostId.get(p.getId()), commentParentDtoMapPostId.get(p.getId()))).collect(Collectors.toList());
+        return posts.stream().map(p -> new PostLikeCommentDTO(p,profileService.findByUserId(p.getUser().getId()) ,postImageDTOsMapPostId.get(p.getId()), likeDTOMapPostId.get(p.getId()), commentParentDtoMapPostId.get(p.getId()))).collect(Collectors.toList());
     }
 
     @Override
@@ -191,22 +193,16 @@ public class PostServiceImpl implements PostService {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
-
-        List<CommentDTO> commentChildren = commentDTO.getCommentChildren();
-        CommentDTO comment = (commentChildren != null && !commentChildren.isEmpty())
-                ? commentChildren.get(commentChildren.size() - 1)
-                : commentDTO;
-
-        Post post = findById(comment.getPostId()).get();
-        User user = userService.findById(comment.getUserId()).get();
+        Post post = findById(commentDTO.getPostId()).get();
+        User user = userService.findById(commentDTO.getUserId()).get();
 
         Comment newComment = new Comment();
         newComment.setPost(post);
         newComment.setUser(user);
-        newComment.setContent(comment.getContent());
-        newComment.setParentCommentId(comment.getParentCommentId());
+        newComment.setContent(commentDTO.getContent());
+        newComment.setParentCommentId(commentDTO.getParentCommentId());
 
-        List<CommentImageDTO> commentImageDTOList = comment.getCommentImages();
+        List<CommentImageDTO> commentImageDTOList = commentDTO.getCommentImages();
         List<CommentImage> commentImageList = new ArrayList<>();
         for (CommentImageDTO commentImageDTO : commentImageDTOList) {
             CommentImage commentImage = new CommentImage();
@@ -220,5 +216,23 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deleteCommentPost(Long id) {
         commentService.delete(id);
+    }
+
+    @Override
+    public void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult, UserDetails userDetails) {
+        if (bindingResult.hasFieldErrors()) {
+            List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
+            throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
+        }
+        Comment comment = commentService.findById(id).get();
+        comment.setContent(commentUpdateDTO.getContent());
+        List<CommentImage> commentImageList = new ArrayList<>();
+        for (CommentImageDTO commentImageDTO : commentUpdateDTO.getCommentImages()) {
+            CommentImage commentImage = new CommentImage();
+            commentImage.setComment(comment);
+            commentImage.setImage(commentImageDTO.getImage());
+        }
+        commentService.update(comment, commentImageList, id, bindingResult, userDetails);
+
     }
 }

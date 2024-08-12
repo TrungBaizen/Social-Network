@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile,Long> {
     List<Profile> findAllByFirstNameContainingOrLastNameContaining(String firstname, String lastname);
+    Profile findByUserId(Long userId);
 }

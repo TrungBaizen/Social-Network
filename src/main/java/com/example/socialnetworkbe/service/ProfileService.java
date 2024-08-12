@@ -14,4 +14,5 @@ public interface ProfileService{
     Optional<Profile> findById(Long id);
     List<Profile> findAll();
     List<Profile> searchProfile(String name);
+    Profile findByUserId(Long userId);
 }

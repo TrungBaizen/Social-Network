@@ -18,4 +18,6 @@ public interface CommentImageRepository extends JpaRepository<CommentImage,Long>
     @Query(value = "select ci.* from comment_images ci" +
             " join tdh.comments c on c.id = ci.comment_id join tdh.posts p on p.id = c.post_id WHERE p.id in (:postIds)", nativeQuery = true)
     List<CommentImage> findImageAllByPostIdIn(List<Long> postIds);
+
+    List<CommentImage> findImageAllByCommentId(Long commentId);
 }

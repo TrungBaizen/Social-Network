@@ -1,9 +1,6 @@
 package com.example.socialnetworkbe.controller;
 
-import com.example.socialnetworkbe.model.DTO.CommentDTO;
-import com.example.socialnetworkbe.model.DTO.LikeDTO;
-import com.example.socialnetworkbe.model.DTO.PostDTO;
-import com.example.socialnetworkbe.model.DTO.PostLikeCommentDTO;
+import com.example.socialnetworkbe.model.DTO.*;
 import com.example.socialnetworkbe.model.Like;
 import com.example.socialnetworkbe.model.Post;
 import com.example.socialnetworkbe.service.PostService;
@@ -28,6 +25,7 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
+
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody PostDTO postDTO, BindingResult bindingResult) {
         return new ResponseEntity<>(postService.save(postDTO, bindingResult), HttpStatus.CREATED);
@@ -37,11 +35,13 @@ public class PostController {
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostDTO postDTO, BindingResult bindingResult, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(postService.update(postDTO, id, bindingResult, userDetails), HttpStatus.OK);
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Post> deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(postService.delete(id, userDetails), HttpStatus.OK);
     }
-//    @GetMapping
+
+    //    @GetMapping
 //    public ResponseEntity<List<Post>> getPostList() {
 //        return new ResponseEntity<>(postService.findAll(), HttpStatus.OK);
 //    }
@@ -58,7 +58,7 @@ public class PostController {
 
     @PostMapping("/likes")
     public ResponseEntity<?> likePost(@Validated @RequestBody LikeDTO likeDTO, BindingResult bindingResult) {
-        postService.likePost(likeDTO,bindingResult);
+        postService.likePost(likeDTO, bindingResult);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -70,7 +70,13 @@ public class PostController {
 
     @PostMapping("/comments")
     public ResponseEntity<?> commentPost(@Validated @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
-        postService.commentPost(commentDTO,bindingResult);
+        postService.commentPost(commentDTO, bindingResult);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/comments/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @Validated @RequestBody CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult,@AuthenticationPrincipal UserDetails userDetails) {
+        postService.updateCommentPost(commentId,commentUpdateDTO, bindingResult,userDetails);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

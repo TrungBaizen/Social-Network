@@ -39,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment update(Comment comment, Long id, BindingResult bindingResult, UserDetails userDetails) {
+    public Comment update(Comment comment,List<CommentImage> commentImage ,Long id, BindingResult bindingResult, UserDetails userDetails) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
@@ -49,6 +49,13 @@ public class CommentServiceImpl implements CommentService {
             throw new AccessDeniedException("Bạn không phải là chủ sở hữu của bình luận này");
         }
         comment.setId(id);
+        if (commentImageService.findImageAllByCommentId(comment.getId()).isEmpty()) {
+            commentImageService.saveAll(commentImage);
+        }else {
+            commentImageService.deleteAllByCommentId(id);
+            commentImageService.saveAll(commentImage);
+        }
+
         return commentRepository.save(comment);
     }
 

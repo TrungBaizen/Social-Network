@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface CommentService {
     Comment save(Comment comment,List<CommentImage> commentImage ,BindingResult bindingResult);
 
-    Comment update(Comment comment, Long id, BindingResult bindingResult, UserDetails userDetails);
+    Comment update(Comment comment,List<CommentImage> commentImage ,Long id, BindingResult bindingResult, UserDetails userDetails);
 
     List<Comment> findAllByPostId(Long postId);
 
@@ -28,6 +28,5 @@ public interface CommentService {
     List<CommentImage> findImageAllByPostIdIn(List<Long> postIds);
 
     List<Comment> findAllByPostIdIn(List<Long> postId);
-
 
 }

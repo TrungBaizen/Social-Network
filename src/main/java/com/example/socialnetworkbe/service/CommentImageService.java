@@ -9,4 +9,5 @@ public interface CommentImageService {
     List<CommentImage> findImageAllByPostId(Long postId);
     List<CommentImage> findImageAllByPostIdIn(List<Long> postIds);
     void saveAll(List<CommentImage> images);
+    List<CommentImage> findImageAllByCommentId(Long commentId);
 }

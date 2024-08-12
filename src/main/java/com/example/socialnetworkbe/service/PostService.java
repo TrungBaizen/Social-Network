@@ -1,11 +1,9 @@
 package com.example.socialnetworkbe.service;
 
-import com.example.socialnetworkbe.model.DTO.CommentDTO;
-import com.example.socialnetworkbe.model.DTO.LikeDTO;
-import com.example.socialnetworkbe.model.DTO.PostDTO;
-import com.example.socialnetworkbe.model.DTO.PostLikeCommentDTO;
+import com.example.socialnetworkbe.model.DTO.*;
 import com.example.socialnetworkbe.model.Like;
 import com.example.socialnetworkbe.model.Post;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 
@@ -32,4 +30,6 @@ public interface PostService {
     void commentPost(CommentDTO commentDTO, BindingResult bindingResult);
 
     void deleteCommentPost(Long id);
+
+    void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult , @AuthenticationPrincipal UserDetails userDetails);
 }

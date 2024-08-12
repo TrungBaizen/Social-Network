@@ -36,4 +36,9 @@ public class CommentImageServiceImpl implements CommentImageService {
     public void saveAll(List<CommentImage> images) {
         commentImageRepository.saveAll(images);
     }
+
+    @Override
+    public List<CommentImage> findImageAllByCommentId(Long commentId) {
+        return commentImageRepository.findImageAllByCommentId(commentId);
+    }
 }

@@ -73,4 +73,11 @@ public class ProfileServiceImpl implements ProfileService {
         }
         return profileRepository.findAllByFirstNameContainingOrLastNameContaining(name,name);
     }
+
+    @Override
+    public Profile findByUserId(Long userId) {
+        return profileRepository.findByUserId(userId);
+    }
+
+
 }
