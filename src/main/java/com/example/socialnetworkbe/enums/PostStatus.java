@@ -1,6 +1,6 @@
 package com.example.socialnetworkbe.enums;
 
-public enum Status {
+public enum PostStatus {
     PRIVATE,
     PUBLIC
 }

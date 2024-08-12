@@ -1,6 +1,6 @@
 package com.example.socialnetworkbe.controller;
 
-import com.example.socialnetworkbe.enums.Status;
+import com.example.socialnetworkbe.enums.PostStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/statuses")
-public class StatusController {
+@RequestMapping("/post_statuses")
+public class PostStatusController {
     @GetMapping
-    public ResponseEntity<Status[]> getStatuses() {
-        return new ResponseEntity<>(Status.values(), HttpStatus.OK);
+    public ResponseEntity<PostStatus[]> getStatuses() {
+        return new ResponseEntity<>(PostStatus.values(), HttpStatus.OK);
     }
 }

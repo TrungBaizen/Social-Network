@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "comment_images")
 @AllArgsConstructor
@@ -25,11 +23,4 @@ public class CommentImage {
 
     @Column(columnDefinition = "LONGTEXT")
     private String image;
-
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

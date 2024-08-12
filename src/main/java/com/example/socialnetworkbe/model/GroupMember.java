@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -27,11 +28,6 @@ public class GroupMember {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
+    @CreationTimestamp
     private LocalDateTime joinedAt;
-    @PrePersist
-    public void onCreate() {
-        joinedAt = LocalDateTime.now();
-    }
-
 }

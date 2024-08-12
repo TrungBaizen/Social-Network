@@ -8,10 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "profiles")
@@ -33,8 +34,6 @@ public class Profile {
     private String lastName;
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProfileImage> profileImages;
     @Column(columnDefinition = "TEXT")
     private String description;
     @Past(message = "Ngày sinh phải ngày trong quá khứ")
@@ -45,19 +44,8 @@ public class Profile {
     private String currentLocation;
     @Column(name = "occupation")
     private String occupation;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-
 }

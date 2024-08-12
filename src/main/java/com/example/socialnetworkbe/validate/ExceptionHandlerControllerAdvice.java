@@ -21,9 +21,11 @@ public class ExceptionHandlerControllerAdvice {
         }
         return messages;
     }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleNullPointerException(IllegalArgumentException e){
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> handleNullPointerException(IllegalArgumentException e) {
+        String message = e.getMessage();
+        return new ResponseEntity<>(message, HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler(ValidationException.class)

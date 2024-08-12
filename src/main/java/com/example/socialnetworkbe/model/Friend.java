@@ -9,28 +9,26 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+
 @Entity
-@Table(name = "group_messages")
+@Table(name = "friends")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class GroupMessage {
+public class Friend {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @JoinColumn(name = "friend_user_id", nullable = false)
+    private User friendUser;
 
-    private String content;
-    @Column(columnDefinition = "LONGTEXT")
-    private String imageGroupMessage;
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

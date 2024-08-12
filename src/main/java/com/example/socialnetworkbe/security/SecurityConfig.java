@@ -3,14 +3,12 @@ package com.example.socialnetworkbe.security;
 import com.example.socialnetworkbe.security.jwt.CustomAccessDeniedHandler;
 import com.example.socialnetworkbe.security.jwt.JwtAuthenticationFilter;
 import com.example.socialnetworkbe.service.UserService;
-import com.example.socialnetworkbe.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -61,7 +59,7 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/hello","/password-reset","/verify").permitAll()
+                        .requestMatchers("/login", "/register", "/hello","/password-reset","/verify","/genders","/statuses","/login/oauth","/posts/**").permitAll()
                         .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER")
                         .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                 )

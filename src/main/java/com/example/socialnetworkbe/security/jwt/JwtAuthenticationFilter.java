@@ -2,7 +2,6 @@ package com.example.socialnetworkbe.security.jwt;
 
 import com.example.socialnetworkbe.service.UserService;
 import com.example.socialnetworkbe.service.impl.JwtService;
-import com.example.socialnetworkbe.service.impl.UserServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

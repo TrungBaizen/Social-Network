@@ -1,9 +1,11 @@
 package com.example.socialnetworkbe.controller;
 
 import com.example.socialnetworkbe.enums.Gender;
-import com.example.socialnetworkbe.model.*;
+import com.example.socialnetworkbe.enums.RegistrationType;
 import com.example.socialnetworkbe.model.DTO.PasswordChangeRequest;
+import com.example.socialnetworkbe.model.DTO.UserOAuth;
 import com.example.socialnetworkbe.model.DTO.UserProfileRegister;
+import com.example.socialnetworkbe.model.*;
 import com.example.socialnetworkbe.service.ProfileImageService;
 import com.example.socialnetworkbe.service.ProfileService;
 import com.example.socialnetworkbe.service.RoleService;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -28,7 +31,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @RestController
 @CrossOrigin("*")
@@ -97,12 +99,12 @@ public class UserController {
         }
         user.setPassword(passwordEncoder.encode(userProfileRegister.getPassword()));
         user.setConfirmPassword(passwordEncoder.encode(userProfileRegister.getConfirmPassword()));
+        user.setRegistrationType(RegistrationType.NORMAL);
         userService.save(user);
         User currentUser = userService.findByEmail(user.getEmail());
         Gender gender = userProfileRegister.getGender();
         String firstName = userProfileRegister.getFirstName();
         String lastName = userProfileRegister.getLastName();
-        String avatar = "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";
         LocalDate birthDate = userProfileRegister.getBirthDate();
         Profile profile = new Profile();
         profile.setUser(currentUser);
@@ -138,24 +140,70 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        // kiểm tra tài khoản mật khẩu
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        // đúng thì tạo ra SecurityContextHolder để lưu trữ đối tượng đang đăng nhập
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        // tạo ra token
-        String jwt = jwtService.generateTokenLogin(authentication);
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User currentUser = userService.findByEmail(user.getEmail());
+        User user1 = userService.findByEmail(user.getEmail());
+        if (user1.getRegistrationType()== RegistrationType.OAUTH) return new ResponseEntity<>("Tài khoản này hiện chưa đăng ký",HttpStatus.BAD_REQUEST);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            // Nếu xác thực thành công
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Tạo ra token
+            String jwt = jwtService.generateTokenLogin(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User currentUser = userService.findByEmail(user.getEmail());
+            userService.setActive(currentUser, true);
+            // Trả về phản hồi thành công với token
+            return ResponseEntity.ok(new JwtResponse(jwt, currentUser.getId(), userDetails.getUsername(), userDetails.getAuthorities()));
+        }catch (BadCredentialsException e) {
+            return new ResponseEntity<>("Sai mật khẩu hoăc password", HttpStatus.BAD_REQUEST);
+        }catch (Throwable e) {
+            return new ResponseEntity<>("Tài khoản chưa kích hoạt", HttpStatus.BAD_REQUEST);
+        }
+    }
+    @PostMapping("/login/oauth")
+    public ResponseEntity<?> loginWithOAuth(@Validated @RequestBody UserOAuth userOAuth, BindingResult bindingResult) {
+        User user1 = userService.findByEmail(userOAuth.getEmail());
+        if (user1 == null) {
+            User user = new User();
+            user.setEmail(userOAuth.getEmail());
+            user.setPassword(passwordEncoder.encode(userOAuth.getIdentifier()));
+            user.setConfirmPassword(passwordEncoder.encode(userOAuth.getIdentifier()));
+            Role role = roleService.findByName("ROLE_USER");
+            Set<Role> roles = new HashSet<>();
+            roles.add(role);
+            user.setRoles(roles);
+            user.setEnabled(true);
+            user.setRegistrationType(RegistrationType.OAUTH);
+            userService.save(user);
+            User currentUser = userService.findByEmail(user.getEmail());
+            String firstName = userOAuth.getFirstName();
+            String lastName = userOAuth.getLastName();
+            Profile profile = new Profile();
+            profile.setUser(currentUser);
+            profile.setFirstName(firstName);
+            profile.setLastName(lastName);
+            profileService.save(profile,bindingResult);
+            // Tạo profile image với ảnh mặc định
+            ProfileImage profileImage = new ProfileImage();
+            profileImage.setProfile(profile);
+            profileImage.setImage(DEFAULT_IMAGE);
+            profileImageService.save(profileImage,bindingResult);
+        }
+        String jwt = jwtService.generateTokenLoginOauth2(userOAuth.getEmail());
+        User currentUser = userService.findByEmail(userOAuth.getEmail());
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.withUsername(currentUser.getEmail())
+                .password(currentUser.getPassword())
+                .authorities("ROLE_USER")
+                .build();
         userService.setActive(currentUser, true);
         return ResponseEntity.ok(new JwtResponse(jwt, currentUser.getId(), userDetails.getUsername(), userDetails.getAuthorities()));
     }
-
     @PostMapping("/users/logout")
     public ResponseEntity<?> logout(@RequestBody User user) {
         User currentUser = userService.findByEmail(user.getEmail());
         userService.setActive(currentUser, false);
         SecurityContextHolder.clearContext();
-        return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Đăng xuất thành công", HttpStatus.OK);
     }
 
     @PostMapping("/users/change-password")
@@ -185,7 +233,7 @@ public class UserController {
 
     @GetMapping("/hello")
     public ResponseEntity<String> hello() {
-        return new ResponseEntity("Hello World", HttpStatus.OK);
+        return new ResponseEntity("Hello", HttpStatus.OK);
     }
 
     @GetMapping("/users/{id}")

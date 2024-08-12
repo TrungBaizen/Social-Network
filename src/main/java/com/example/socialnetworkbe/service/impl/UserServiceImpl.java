@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +21,7 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final int PASSWORD_LENGTH = 8; // độ dài mật khẩu mới
+    private static final int PASSWORD_LENGTH = 6; // độ dài mật khẩu mới
 
     private final UserRepository userRepository;
     private final EmailService emailService;
@@ -35,7 +34,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     //Tạo ra 1 user details (tương tác với ứng dụng mỗi lần đăng nhập)
-    public UserDetails loadUserByUsername(String email) {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException{
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException(email);
@@ -54,11 +53,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public  String resetPassword(String to) {
         String newPassword = generateNewPassword();
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(to);
-//        message.setSubject("Cấp mật khẩu mới");
-//        message.setText("Mật khẩu mới là: " + newPassword + "\nVui lòng thay đổi mật khẩu mới khi đăng nhập.");
-//        mailSender.send(message);
         emailService.sendEmail(to,"Cấp mật khẩu mới","Mật khẩu mới là: " + newPassword + "\nVui lòng thay đổi mật khẩu mới khi đăng nhập.");
 
         return newPassword;

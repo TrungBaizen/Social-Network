@@ -8,8 +8,10 @@ import java.util.Optional;
 
 public interface LikeService{
     Like save(Like like , BindingResult bindingResult);
-    Like update(Like like,Long id , BindingResult bindingResult);
-    Like delete(Long id);
+    void delete(Long id);
+    List<Like> findAllByPostId(Long postId);
+    void deleteAllByPostId(Long id);
     Optional<Like> findById(Long id);
-    List<Like> findAll();
+    List<Like> findAllByPostIdIn(List<Long> postIds);
+    boolean checkLike(Long userId, Long postId);
 }

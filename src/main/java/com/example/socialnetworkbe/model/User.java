@@ -1,9 +1,8 @@
 package com.example.socialnetworkbe.model;
 
+import com.example.socialnetworkbe.enums.RegistrationType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-
 
 import java.io.Serializable;
 import java.util.Set;
@@ -17,7 +16,7 @@ public class User implements Serializable {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@gmail\\.com$",message = "Sai định dạng mail")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@gmail\\.com$", message = "Sai định dạng mail")
     private String email;
 
     @Column(nullable = false)
@@ -31,7 +30,9 @@ public class User implements Serializable {
     // Thêm trường active để theo dõi trạng thái tài khoản
     private boolean active = false;
     private String verificationToken;
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RegistrationType registrationType;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -123,5 +124,13 @@ public class User implements Serializable {
 
     public void setVerificationToken(String verificationToken) {
         this.verificationToken = verificationToken;
+    }
+
+    public RegistrationType getRegistrationType() {
+        return registrationType;
+    }
+
+    public void setRegistrationType(RegistrationType registrationType) {
+        this.registrationType = registrationType;
     }
 }

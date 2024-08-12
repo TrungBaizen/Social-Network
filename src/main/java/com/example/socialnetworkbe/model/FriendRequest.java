@@ -1,36 +1,37 @@
 package com.example.socialnetworkbe.model;
 
+import com.example.socialnetworkbe.enums.FriendStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "group_messages")
+@Table(name = "friend_requests")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class GroupMessage {
+public class FriendRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
-
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
-
-    private String content;
-    @Column(columnDefinition = "LONGTEXT")
-    private String imageGroupMessage;
+    @ManyToOne
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FriendStatus friendStatus = FriendStatus.PENDING;
     @CreationTimestamp
-    private LocalDateTime createdAt;
+    private LocalDateTime createTime;
+    @UpdateTimestamp
+    private LocalDateTime updateTime;
 }
