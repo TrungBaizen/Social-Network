@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PostLikeCommentDTO {
+    private Long id;
     private Long userId;
     private String firstName;
     private String lastName;
@@ -28,6 +29,7 @@ public class PostLikeCommentDTO {
     private List<CommentDTO> comments;
 
     public PostLikeCommentDTO(Post post, Profile profile, List<PostImageDTO> relatedPostImages, List<LikeDTO> relatedLikes, List<CommentDTO> relatedComments) {
+        this.id = post.getId();
         this.userId = post.getUser().getId();
         this.firstName = profile.getFirstName();
         this.lastName = profile.getLastName();

@@ -8,6 +8,7 @@ import com.example.socialnetworkbe.service.LikeService;
 import com.example.socialnetworkbe.service.PostService;
 import com.example.socialnetworkbe.service.UserService;
 import com.example.socialnetworkbe.validate.ExceptionHandlerControllerAdvice;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class LikeServiceImpl implements LikeService {
         return likeRepository.findAllByPostId(postId);
     }
 
+    @Transactional
     @Override
     public void deleteAllByPostId(Long postId) {
         likeRepository.deleteAllByPostId(postId);

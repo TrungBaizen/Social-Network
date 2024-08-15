@@ -44,6 +44,10 @@ public class Profile {
     private String currentLocation;
     @Column(name = "occupation")
     private String occupation;
+    @Column(columnDefinition = "LONGTEXT")
+    private String imageAvatar;
+    @Column(columnDefinition = "LONGTEXT")
+    private String imageCover;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

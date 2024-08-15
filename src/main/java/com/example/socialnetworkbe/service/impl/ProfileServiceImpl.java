@@ -1,16 +1,21 @@
 package com.example.socialnetworkbe.service.impl;
 
+
+import com.example.socialnetworkbe.model.DTO.FriendDTO;
+import com.example.socialnetworkbe.model.DTO.ProfileDTO;
+import com.example.socialnetworkbe.model.Friend;
 import com.example.socialnetworkbe.model.Profile;
 import com.example.socialnetworkbe.repository.ProfileRepository;
+import com.example.socialnetworkbe.service.FriendService;
 import com.example.socialnetworkbe.service.ProfileService;
 import com.example.socialnetworkbe.validate.ExceptionHandlerControllerAdvice;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,9 +24,12 @@ import java.util.stream.Collectors;
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
 
+    private final FriendService friendService;
+
     @Autowired
-    public ProfileServiceImpl(ProfileRepository profileRepository) {
+    public ProfileServiceImpl(ProfileRepository profileRepository, FriendService friendService) {
         this.profileRepository = profileRepository;
+        this.friendService = friendService;
     }
 
     @Override
@@ -34,18 +42,33 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public Profile update( Profile profile,Long id, BindingResult bindingResult, UserDetails userDetails) {
+    public ProfileDTO update( Profile profile,Long id, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
-        Profile existingProfile = findById(id).get();
-
-        if (!existingProfile.getUser().getEmail().equals(userDetails.getUsername())) {
-            throw new AccessDeniedException("Bạn không phải là chủ sở hữu của profile này");
+        Profile profileToUpdate = findById(id).get();
+        profileToUpdate.setGender(profile.getGender());
+        profileToUpdate.setFirstName(profile.getFirstName());
+        profileToUpdate.setLastName(profile.getLastName());
+        profileToUpdate.setBirthDate(profile.getBirthDate());
+        profileToUpdate.setCurrentLocation(profile.getCurrentLocation());
+        profileToUpdate.setDescription(profile.getDescription());
+        profileToUpdate.setHometown(profile.getHometown());
+        profileToUpdate.setOccupation(profile.getOccupation());
+        profileRepository.save(profileToUpdate);
+        List<Friend> friendList = friendService.getListFriend(profileToUpdate.getUser().getEmail());
+        if (friendList.isEmpty()) {
+            friendList = Collections.emptyList();
         }
-        profile.setId(id);
-        return profileRepository.save(profile);
+        List<FriendDTO> friendDTOList = new ArrayList<>();
+        for (Friend friend : friendList) {
+            Profile friendProfile = profileRepository.findByEmail(friend.getUser().getEmail());
+            FriendDTO friendDTO = new FriendDTO(friend,friendProfile);
+            friendDTOList.add(friendDTO);
+        }
+        ProfileDTO profileDTO = new ProfileDTO(profileToUpdate,friendDTOList);
+        return profileDTO;
     }
 
 
@@ -58,13 +81,6 @@ public class ProfileServiceImpl implements ProfileService {
         throw new IllegalArgumentException();
     }
 
-    @Override
-    public List<Profile> findAll() {
-        if (profileRepository.findAll().isEmpty()) {
-            throw new IllegalArgumentException();
-        }
-        return profileRepository.findAll();
-    }
 
     @Override
     public List<Profile> searchProfile(String name) {
@@ -79,5 +95,37 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.findByUserId(userId);
     }
 
+    @Override
+    public ProfileDTO getProfile(String email) {
+       Profile profile = profileRepository.findByEmail(email);
+       if (profile == null) {
+           throw new IllegalArgumentException("Tài khoản hiện chưa tồn tại.");
+       }
+       List<Friend> friendList = friendService.getListFriend(profile.getUser().getEmail());
+       if (friendList.isEmpty()) {
+           friendList = Collections.emptyList();
+       }
+       List<FriendDTO> friendDTOList = new ArrayList<>();
+       for (Friend friend : friendList) {
+           Profile friendProfile = profileRepository.findByEmail(friend.getUser().getEmail());
+           FriendDTO friendDTO = new FriendDTO(friend,friendProfile);
+           friendDTOList.add(friendDTO);
+       }
+        ProfileDTO profileDTO = new ProfileDTO(profile,friendDTOList);
+        return profileDTO;
+    }
 
+    @Override
+    public Profile updateImageAvatar(Long id ,String image, BindingResult bindingResult ) {
+        Profile profile = findById(id).get();
+        profile.setImageAvatar(image);
+        return save(profile,bindingResult);
+    }
+
+    @Override
+    public Profile updateImageCover(Long id ,String image, BindingResult bindingResult ) {
+        Profile profile = findById(id).get();
+        profile.setImageCover(image);
+        return save(profile,bindingResult);
+    }
 }

@@ -15,7 +15,7 @@ public interface PostService {
 
     Post update(PostDTO postDTO, Long id, BindingResult bindingResult, UserDetails userDetails);
 
-    Post delete(Long id ,UserDetails userDetails);
+    Post delete(Long id);
 
     Optional<Post> findById(Long id);
 

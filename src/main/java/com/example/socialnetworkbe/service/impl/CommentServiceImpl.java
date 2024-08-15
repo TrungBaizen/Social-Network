@@ -6,6 +6,7 @@ import com.example.socialnetworkbe.repository.CommentRepository;
 import com.example.socialnetworkbe.service.CommentImageService;
 import com.example.socialnetworkbe.service.CommentService;
 import com.example.socialnetworkbe.validate.ExceptionHandlerControllerAdvice;
+import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -69,6 +70,7 @@ public class CommentServiceImpl implements CommentService {
         return commentImageService.findImageAllByPostId(postId);
     }
 
+    @Transactional
     @Override
     public void deleteAllByPostId(Long postId) {
         List<Comment> findAllCommentByPostId = commentRepository.findAllByPostId(postId);

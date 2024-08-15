@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class ExceptionHandlerControllerAdvice {
     public static List<String> getMessageError(BindingResult bindingResult) {
         List<String> messages = new ArrayList<>();
-        for (FieldError error : bindingResult.getFieldErrors()) {
+        for (ObjectError error : bindingResult.getAllErrors()) {
             messages.add(error.getDefaultMessage());
         }
         return messages;

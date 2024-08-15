@@ -3,6 +3,7 @@ package com.example.socialnetworkbe.service.impl;
 import com.example.socialnetworkbe.model.PostImage;
 import com.example.socialnetworkbe.repository.PostImageRepository;
 import com.example.socialnetworkbe.service.PostImageService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class PostImageServiceImpl implements PostImageService {
         postImageRepository.saveAll(images);
     }
 
+    @Transactional
     @Override
     public void deleteAllByPostId(Long postId) {
         postImageRepository.deleteAllByPostId(postId);

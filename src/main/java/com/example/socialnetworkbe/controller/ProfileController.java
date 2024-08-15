@@ -1,12 +1,11 @@
 package com.example.socialnetworkbe.controller;
 
+import com.example.socialnetworkbe.model.DTO.ProfileDTO;
 import com.example.socialnetworkbe.model.Profile;
 import com.example.socialnetworkbe.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,13 +24,8 @@ public class ProfileController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Profile>> getProfiles() {
-        return new ResponseEntity<>(profileService.findAll(), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Profile> getProfileById(@PathVariable Long id) {
-        return new ResponseEntity<>(profileService.findById(id).get(), HttpStatus.OK);
+    public ResponseEntity<ProfileDTO> getProfile(@RequestParam String email) {
+        return new ResponseEntity<>(profileService.getProfile(email), HttpStatus.OK);
     }
 
     @GetMapping("/search")
@@ -39,9 +33,20 @@ public class ProfileController {
         return new ResponseEntity<>(profileService.searchProfile(name), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Profile> updateProfile(@PathVariable Long id, @Validated @RequestBody Profile profile, BindingResult bindingResult, @AuthenticationPrincipal UserDetails userDetails) {
-        Profile updatedProfile = profileService.update(profile, id, bindingResult, userDetails);
+    @PostMapping("/{id}")
+    public ResponseEntity<ProfileDTO> updateProfile(@PathVariable Long id, @Validated @RequestBody Profile profile, BindingResult bindingResult) {
+        ProfileDTO updatedProfile = profileService.update(profile, id, bindingResult);
         return new ResponseEntity<>(updatedProfile, HttpStatus.OK);
+    }
+
+    @PostMapping("/imageavatar/{id}")
+    public ResponseEntity<Void> uploadImageAvatar(@PathVariable Long id, @Validated @RequestBody String image, BindingResult bindingResult) {
+        profileService.updateImageAvatar(id, image, bindingResult);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    @PostMapping("/imagecover/{id}")
+    public ResponseEntity<Void> uploadImageCover(@PathVariable Long id, @Validated @RequestBody String image, BindingResult bindingResult ) {
+        profileService.updateImageCover(id, image, bindingResult);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

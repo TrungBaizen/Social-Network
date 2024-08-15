@@ -36,7 +36,6 @@ public class PostServiceImpl implements PostService {
         this.postImageService = postImageService;
         this.likeService = likeService;
         this.commentService = commentService;
-
         this.userService = userService;
         this.profileService = profileService;
     }
@@ -103,14 +102,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post delete(Long id, UserDetails userDetails) {
+    public Post delete(Long id) {
         Post existingPost = findById(id).get();
         String userEmail = existingPost.getUser().getEmail();
-        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-
-        if (!existingPost.getUser().getEmail().equals(userEmail) && !isAdmin) {
-            throw new IllegalArgumentException("Bạn không có quyền xóa bài đăng này");
-        }
         commentService.deleteAllByPostId(existingPost.getId());
         likeService.deleteAllByPostId(existingPost.getId());
         postImageService.deleteAllByPostId(existingPost.getId());
