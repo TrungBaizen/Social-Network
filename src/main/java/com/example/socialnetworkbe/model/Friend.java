@@ -31,4 +31,10 @@ public class Friend {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean isFollow = false;
+
+    @Column(nullable = false)
+    private boolean isAccepted = false;
 }

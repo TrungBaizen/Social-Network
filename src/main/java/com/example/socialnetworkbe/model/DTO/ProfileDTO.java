@@ -28,6 +28,7 @@ public class ProfileDTO {
     private String imageCover;
     private List<FriendDTO> friendList;
 
+
     public ProfileDTO(Profile profile,List<FriendDTO> friendDTOList){
         this.userId = profile.getUser().getId();
         this.firstName = profile.getFirstName();
@@ -40,6 +41,6 @@ public class ProfileDTO {
         this.occupation = profile.getOccupation();
         this.imageAvatar = profile.getImageAvatar();
         this.imageCover = profile.getImageCover();
-        this.friendList = friendDTOList;  // Cập nhật danh sách bạn bè
+        this.friendList = friendDTOList;
     }
 }

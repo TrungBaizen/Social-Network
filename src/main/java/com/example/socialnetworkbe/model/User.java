@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Entity
-public class User implements Serializable {
+ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -133,4 +133,5 @@ public class User implements Serializable {
     public void setRegistrationType(RegistrationType registrationType) {
         this.registrationType = registrationType;
     }
+
 }

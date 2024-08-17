@@ -1,6 +1,5 @@
 package com.example.socialnetworkbe.model;
 
-import com.example.socialnetworkbe.enums.FriendStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,11 +26,16 @@ public class FriendRequest {
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private FriendStatus friendStatus = FriendStatus.PENDING;
+
     @CreationTimestamp
     private LocalDateTime createTime;
     @UpdateTimestamp
     private LocalDateTime updateTime;
+
+    @Column(nullable = false)
+    private boolean isFollow;
+
+    @Column(nullable = false)
+    private boolean isAccepted;
+
 }
