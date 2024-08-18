@@ -8,11 +8,15 @@ import com.example.socialnetworkbe.repository.UserRepository;
 import com.example.socialnetworkbe.service.*;
 import com.example.socialnetworkbe.validate.ExceptionHandlerControllerAdvice;
 import jakarta.validation.ValidationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,56 +45,63 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post save(PostDTO postDTO, BindingResult bindingResult) {
+    public PostLikeCommentDTO save(PostDTO postDTO, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
+
         String email = postDTO.getEmail();
-        String content = postDTO.getContent();
-        List<String> images = postDTO.getPostImages();
-        PostStatus postStatus = postDTO.getPostStatus();
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new IllegalArgumentException("Tài khoản " + email + " không tồn tại.");
         }
+
         Post post = new Post();
         post.setUser(user);
-        post.setContent(content);
-        post.setPostStatus(postStatus);
+        post.setContent(postDTO.getContent());
+        post.setPostStatus(postDTO.getPostStatus());
         Post postSave = postRepository.save(post);
 
-        if (!images.isEmpty()) {
-            List<PostImage> postImageList = images.stream().map(image -> {
-                PostImage postImage = new PostImage();
-                postImage.setPost(postSave);  // Liên kết với bài viết đã lưu
-                postImage.setImage(image);
-                return postImage;
-            }).collect(toList());
+        List<PostImage> postImageList = postDTO.getPostImages().stream().map(image -> {
+            PostImage postImage = new PostImage();
+            postImage.setPost(postSave);
+            postImage.setImage(image);
+            return postImage;
+        }).collect(Collectors.toList());
+
+        if (!postImageList.isEmpty()) {
             postImageService.saveAll(postImageList);
         }
 
-        return postRepository.save(postSave);
+        Profile profile = profileService.findByUserId(user.getId());
+        List<PostImageDTO> postImageDTOList = postImageList.stream().map(postImage -> {
+            PostImageDTO postImageDTO = new PostImageDTO();
+            postImageDTO.setPostId(postImage.getPost().getId());
+            postImageDTO.setImage(postImage.getImage());
+            return postImageDTO;
+        }).collect(Collectors.toList());
+
+        return new PostLikeCommentDTO(post, profile, postImageDTOList, new ArrayList<>(), new ArrayList<>());
     }
 
+
     @Override
-    public Post update(PostDTO postDTO, Long id, BindingResult bindingResult, UserDetails userDetails) {
+    public PostLikeCommentDTO update(PostDTO postDTO, Long id, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
         Post existingPost = findById(id).get();
-        if (!existingPost.getUser().getEmail().equals(userDetails.getUsername())) {
-            throw new IllegalArgumentException("Bạn không phải là chủ sở hữu của bài đăng này");
-        }
         existingPost.setContent(postDTO.getContent());
         existingPost.setPostStatus(postDTO.getPostStatus());
         List<String> images = postDTO.getPostImages();
+        List<PostImage> postImageList = new ArrayList<>();
         if (images.isEmpty()) {
             postImageService.deleteAllByPostId(existingPost.getId());
         } else {
             postImageService.deleteAllByPostId(existingPost.getId());
-            List<PostImage> postImageList = images.stream().map(image -> {
+            postImageList = images.stream().map(image -> {
                 PostImage postImage = new PostImage();
                 postImage.setPost(existingPost);
                 postImage.setImage(image);
@@ -98,13 +109,28 @@ public class PostServiceImpl implements PostService {
             }).collect(toList());
             postImageService.saveAll(postImageList);
         }
-        return postRepository.save(existingPost);
+        postRepository.save(existingPost);
+        Profile profile = profileService.findByUserId(existingPost.getUser().getId());
+        List<PostImageDTO> postImageDTOList = postImageList.stream().map(postImage -> {
+            PostImageDTO postImageDTO = new PostImageDTO();
+            postImageDTO.setPostId(postImage.getPost().getId());
+            postImageDTO.setImage(postImage.getImage());
+            return postImageDTO;
+        }).collect(Collectors.toList());
+        List<CommentImageDTO> commentsImageDTOs = commentService.findImageAllByPostId(existingPost.getId()).stream().map(CommentImageDTO::new).toList();
+        Map<Long, List<CommentImageDTO>> commentsImageDTOMapPostId = commentsImageDTOs.stream().collect(Collectors.groupingBy(CommentImageDTO::getCommentId));
+        List<CommentDTO> commentDTOS = commentService.findAllByPostId(existingPost.getId()).stream().map(c -> new CommentDTO(c, profile, commentsImageDTOMapPostId)).toList();
+        Map<Long, List<CommentDTO>> commentChildrenDtoMapPostId = commentDTOS.stream()
+                .filter(c -> Objects.nonNull(c.getParentCommentId()))
+                .collect(Collectors.groupingBy(CommentDTO::getParentCommentId));
+        commentDTOS.stream().filter(c -> commentChildrenDtoMapPostId.containsKey(c.getId())).forEach(c -> c.setCommentChildren(commentChildrenDtoMapPostId.get(c.getId())));
+        List<LikeDTO> likeDTOs = likeService.findAllByPostId(existingPost.getId()).stream().map(l -> new LikeDTO(l, profileService.findByUserId(l.getUser().getId()))).toList();
+        return new PostLikeCommentDTO(existingPost, profile, postImageDTOList, likeDTOs, commentDTOS);
     }
 
     @Override
     public Post delete(Long id) {
         Post existingPost = findById(id).get();
-        String userEmail = existingPost.getUser().getEmail();
         commentService.deleteAllByPostId(existingPost.getId());
         likeService.deleteAllByPostId(existingPost.getId());
         postImageService.deleteAllByPostId(existingPost.getId());
@@ -116,6 +142,13 @@ public class PostServiceImpl implements PostService {
     public List<PostLikeCommentDTO> findAllByUserId(Long userId) {
         // Lấy tất cả các bài viết của người dùng
         List<Post> posts = postRepository.findAllByUserId(userId);
+        return findAllByPosts(posts);
+    }
+
+    @Override
+    public List<PostLikeCommentDTO> findAllByFollowing(Long userId) {
+        List<Post> posts = postRepository.findAllByFollowerId(userId);
+        posts.addAll(postRepository.findAllByUserId(userId));
         return findAllByPosts(posts);
     }
 
@@ -148,19 +181,24 @@ public class PostServiceImpl implements PostService {
         Map<Long, List<CommentImageDTO>> commentsImageDTOMapPostId = commentsImageDTOs.stream().collect(Collectors.groupingBy(CommentImageDTO::getCommentId));
         List<CommentDTO> commentDTOS = commentService.findAllByPostIdIn(postIds).stream().map(c -> new CommentDTO(c, profileService.findByUserId(c.getUser().getId()), commentsImageDTOMapPostId)).toList();
         /*Xu ly list comment con*/
+//        Kieu 1
         Map<Long, List<CommentDTO>> commentChildrenDtoMapPostId = commentDTOS.stream()
                 .filter(c -> Objects.nonNull(c.getParentCommentId()))
                 .collect(Collectors.groupingBy(CommentDTO::getParentCommentId));
+//        Kieu 2:
+//        Map<Long, CommentDTO> commentChildrenDtoMapPostIds = commentDTOS.stream()
+//                .filter(c -> Objects.nonNull(c.getParentCommentId()))
+//                .collect(Collectors.toMap(CommentDTO::getParentCommentId, v -> v , (u1,u2) -> u1));
         commentDTOS.stream().filter(c -> commentChildrenDtoMapPostId.containsKey(c.getId())).forEach(c -> c.setCommentChildren(commentChildrenDtoMapPostId.get(c.getId())));
 
         Map<Long, List<CommentDTO>> commentParentDtoMapPostId = commentDTOS.stream().filter(c -> Objects.isNull(c.getParentCommentId())).collect(Collectors.groupingBy(CommentDTO::getPostId));
         List<LikeDTO> likeDTOs = likeService.findAllByPostIdIn(postIds).stream().map(l -> new LikeDTO(l, profileService.findByUserId(l.getUser().getId()))).toList();
         Map<Long, List<LikeDTO>> likeDTOMapPostId = likeDTOs.stream().collect(Collectors.groupingBy(LikeDTO::getPostId));
-        return posts.stream().map(p -> new PostLikeCommentDTO(p,profileService.findByUserId(p.getUser().getId()) ,postImageDTOsMapPostId.get(p.getId()), likeDTOMapPostId.get(p.getId()), commentParentDtoMapPostId.get(p.getId()))).collect(Collectors.toList());
+        return posts.stream().map(p -> new PostLikeCommentDTO(p, profileService.findByUserId(p.getUser().getId()), postImageDTOsMapPostId.get(p.getId()), likeDTOMapPostId.get(p.getId()), commentParentDtoMapPostId.get(p.getId()))).collect(Collectors.toList());
     }
 
     @Override
-    public void likePost(LikeDTO likeDTO, BindingResult bindingResult) {
+    public LikeDTO likePost(LikeDTO likeDTO, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
@@ -173,12 +211,16 @@ public class PostServiceImpl implements PostService {
         Like newLike = new Like();
         newLike.setPost(post);
         newLike.setUser(user);
-        likeService.save(newLike, bindingResult);
+        Like like = likeService.save(newLike, bindingResult);
+        Profile profile = profileService.findByUserId(likeDTO.getUserId());
+        return new LikeDTO(like, profile);
     }
 
     @Override
-    public void deleteLikePost(Long id) {
-        likeService.delete(id);
+    public LikeDTO deleteLikePost(Long id) {
+        Like like = likeService.delete(id);
+        Profile profile = profileService.findByUserId(like.getUser().getId());
+        return new LikeDTO(like, profile);
     }
 
     @Override
@@ -203,8 +245,8 @@ public class PostServiceImpl implements PostService {
             commentImage.setComment(newComment);
             commentImage.setImage(commentImageDTO.getImage());
         }
-        commentService.save(newComment, commentImageList, bindingResult);
-
+        Comment comment = commentService.save(newComment, commentImageList, bindingResult);
+        Profile profile = profileService.findByUserId(commentDTO.getUserId());
     }
 
     @Override
@@ -213,7 +255,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult, UserDetails userDetails) {
+    public void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
@@ -226,7 +268,7 @@ public class PostServiceImpl implements PostService {
             commentImage.setComment(comment);
             commentImage.setImage(commentImageDTO.getImage());
         }
-        commentService.update(comment, commentImageList, id, bindingResult, userDetails);
+        commentService.update(comment, commentImageList, id, bindingResult);
 
     }
 }
