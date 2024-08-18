@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface LikeService{
     Like save(Like like , BindingResult bindingResult);
-    void delete(Long id);
+    Like delete(Long id);
     List<Like> findAllByPostId(Long postId);
     void deleteAllByPostId(Long id);
     Optional<Like> findById(Long id);

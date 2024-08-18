@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 public class ProfileDTO {
     private Long userId;
+    private String email;
     private String firstName;
     private String lastName;
     private Gender gender;
@@ -31,6 +32,7 @@ public class ProfileDTO {
 
     public ProfileDTO(Profile profile,List<FriendDTO> friendDTOList){
         this.userId = profile.getUser().getId();
+        this.email = profile.getUser().getEmail();
         this.firstName = profile.getFirstName();
         this.lastName = profile.getLastName();
         this.gender = profile.getGender();

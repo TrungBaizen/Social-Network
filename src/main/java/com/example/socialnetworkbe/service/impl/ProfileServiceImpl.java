@@ -85,7 +85,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public List<Profile> searchProfile(String name) {
         if (profileRepository.findAllByFirstNameContainingOrLastNameContaining(name,name).isEmpty()) {
-            throw new IllegalArgumentException();
+            return new ArrayList<>();
         }
         return profileRepository.findAllByFirstNameContainingOrLastNameContaining(name,name);
     }

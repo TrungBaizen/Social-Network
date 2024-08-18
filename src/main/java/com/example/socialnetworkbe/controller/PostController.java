@@ -1,14 +1,11 @@
 package com.example.socialnetworkbe.controller;
 
 import com.example.socialnetworkbe.model.DTO.*;
-import com.example.socialnetworkbe.model.Like;
 import com.example.socialnetworkbe.model.Post;
 import com.example.socialnetworkbe.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,25 +24,24 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostDTO postDTO, BindingResult bindingResult) {
+    public ResponseEntity<PostLikeCommentDTO> createPost(@RequestBody PostDTO postDTO, BindingResult bindingResult) {
         return new ResponseEntity<>(postService.save(postDTO, bindingResult), HttpStatus.CREATED);
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostDTO postDTO, BindingResult bindingResult, @AuthenticationPrincipal UserDetails userDetails) {
-        return new ResponseEntity<>(postService.update(postDTO, id, bindingResult, userDetails), HttpStatus.OK);
+    public ResponseEntity<PostLikeCommentDTO> updatePost(@PathVariable Long id, @RequestBody PostDTO postDTO, BindingResult bindingResult) {
+        return new ResponseEntity<>(postService.update(postDTO, id, bindingResult), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Post> deletePost(@PathVariable Long id) {
         return new ResponseEntity<>(postService.delete(id), HttpStatus.OK);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<List<PostLikeCommentDTO>> getAllPostByFollower(@PathVariable Long id) {
+        return new ResponseEntity<>(postService.findAllByFollowing(id), HttpStatus.OK);
+    }
 
-    //    @GetMapping
-//    public ResponseEntity<List<Post>> getPostList() {
-//        return new ResponseEntity<>(postService.findAll(), HttpStatus.OK);
-//    }
-//
     @GetMapping("/users/{userId}")
     public ResponseEntity<List<PostLikeCommentDTO>> getPostByUserId(@PathVariable Long userId) {
         return new ResponseEntity<>(postService.findAllByUserId(userId), HttpStatus.OK);
@@ -57,15 +53,13 @@ public class PostController {
     }
 
     @PostMapping("/likes")
-    public ResponseEntity<?> likePost(@Validated @RequestBody LikeDTO likeDTO, BindingResult bindingResult) {
-        postService.likePost(likeDTO, bindingResult);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<LikeDTO> likePost(@Validated @RequestBody LikeDTO likeDTO, BindingResult bindingResult) {
+        return new ResponseEntity<>(postService.likePost(likeDTO, bindingResult),HttpStatus.OK);
     }
 
     @DeleteMapping("/likes/{likeId}")
-    public ResponseEntity<?> unlikePost(@PathVariable Long likeId) {
-        postService.deleteLikePost(likeId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<LikeDTO> unlikePost(@PathVariable Long likeId) {
+        return new ResponseEntity<>(postService.deleteLikePost(likeId),HttpStatus.OK);
     }
 
     @PostMapping("/comments")
@@ -75,8 +69,8 @@ public class PostController {
     }
 
     @PostMapping("/comments/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @Validated @RequestBody CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult,@AuthenticationPrincipal UserDetails userDetails) {
-        postService.updateCommentPost(commentId,commentUpdateDTO, bindingResult,userDetails);
+    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @Validated @RequestBody CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
+        postService.updateCommentPost(commentId,commentUpdateDTO, bindingResult);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -85,4 +79,6 @@ public class PostController {
         postService.deleteCommentPost(commentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }

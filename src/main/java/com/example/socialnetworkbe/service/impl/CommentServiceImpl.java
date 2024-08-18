@@ -9,8 +9,6 @@ import com.example.socialnetworkbe.validate.ExceptionHandlerControllerAdvice;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
@@ -40,15 +38,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment update(Comment comment,List<CommentImage> commentImage ,Long id, BindingResult bindingResult, UserDetails userDetails) {
+    public Comment update(Comment comment,List<CommentImage> commentImage ,Long id, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
-        Comment existingComment = findById(id).get();
-        if (!existingComment.getUser().getEmail().equals(userDetails.getUsername())) {
-            throw new AccessDeniedException("Bạn không phải là chủ sở hữu của bình luận này");
-        }
+        findById(id).get();
         comment.setId(id);
         if (commentImageService.findImageAllByCommentId(comment.getId()).isEmpty()) {
             commentImageService.saveAll(commentImage);

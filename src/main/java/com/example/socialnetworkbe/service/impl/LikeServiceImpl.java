@@ -37,9 +37,10 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public void delete(Long id) {
-        findById(id);
+    public Like delete(Long id) {
+        Like like = findById(id).get();
         likeRepository.deleteById(id);
+        return like;
     }
 
     @Override

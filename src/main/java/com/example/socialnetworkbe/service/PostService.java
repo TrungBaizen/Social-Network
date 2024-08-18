@@ -1,7 +1,6 @@
 package com.example.socialnetworkbe.service;
 
 import com.example.socialnetworkbe.model.DTO.*;
-import com.example.socialnetworkbe.model.Like;
 import com.example.socialnetworkbe.model.Post;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,9 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostService {
-    Post save(PostDTO postDTO, BindingResult bindingResult);
+    PostLikeCommentDTO save(PostDTO postDTO, BindingResult bindingResult);
 
-    Post update(PostDTO postDTO, Long id, BindingResult bindingResult, UserDetails userDetails);
+    PostLikeCommentDTO update(PostDTO postDTO, Long id, BindingResult bindingResult);
 
     Post delete(Long id);
 
@@ -23,13 +22,15 @@ public interface PostService {
 
     List<PostLikeCommentDTO> findAllByUserId(Long userId);
 
-    void likePost(LikeDTO likeDTO, BindingResult bindingResult);
+    List<PostLikeCommentDTO> findAllByFollowing(Long userId);
 
-    void deleteLikePost(Long id);
+    LikeDTO likePost(LikeDTO likeDTO, BindingResult bindingResult);
+
+    LikeDTO deleteLikePost(Long id);
 
     void commentPost(CommentDTO commentDTO, BindingResult bindingResult);
 
     void deleteCommentPost(Long id);
 
-    void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult , @AuthenticationPrincipal UserDetails userDetails);
+    void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult);
 }
