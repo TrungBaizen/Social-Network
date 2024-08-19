@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FollowService{
+
     Follow save(Follow follow , BindingResult bindingResult);
+
     @Transactional
     Follow update(Follow follow, Long id, BindingResult bindingResult);
 
     Follow delete(Long id);
-    Optional<Follow> findById(Long id);
-    List<Follow> findAll();
 
+    Optional<Follow> findById(Long id);
+
+    List<Follow> findAll();
 }

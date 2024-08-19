@@ -1,5 +1,7 @@
 package com.example.socialnetworkbe.controller;
 
+import com.example.socialnetworkbe.model.Follow;
+import com.example.socialnetworkbe.model.Friend;
 import com.example.socialnetworkbe.model.FriendRequest;
 import com.example.socialnetworkbe.service.FriendRequestService;
 import com.example.socialnetworkbe.service.FriendService;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -107,4 +110,41 @@ public class FriendController {
             return new ResponseEntity<>("Error cancelling friend request", HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<Friend>> getListFriend(@RequestParam String email) {
+        try {
+            List<Friend> friends = friendService.getListFriend(email);
+            return ResponseEntity.ok(friends);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    // API để lấy danh sách bạn bè chung của hai người dùng
+    @GetMapping("/common-friends")
+    public ResponseEntity<List<Friend>> getCommonFriends(
+            @RequestParam Long userId,
+            @RequestParam Long otherUserId) {
+        try {
+            List<Friend> commonFriends = friendService.getCommonFriends(userId, otherUserId);
+            return ResponseEntity.ok(commonFriends);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
+    // Follow một người dùng
+    @PostMapping("/follow")
+    public ResponseEntity<String> followUser(@RequestParam Long userId, @RequestParam Long friendUserId) {
+        try {
+            friendService.followUser(userId, friendUserId);
+            return ResponseEntity.ok("Followed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+
 }

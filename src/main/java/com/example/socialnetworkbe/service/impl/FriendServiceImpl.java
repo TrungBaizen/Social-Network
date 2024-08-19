@@ -15,9 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendServiceImpl implements FriendService {
+
+
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
@@ -40,11 +43,23 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public List<Friend> getListFriend(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new RuntimeException("User not found with email: " + email);
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmail(email));
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return friendRepository.findByUser(user);
         }
-        return friendRepository.findAllByEmail(email);
+        throw new RuntimeException("User not found with email: " + email);
+    }
+
+    @Override
+    public List<Friend> getCommonFriends(Long userId, Long otherUserId) {
+        List<Friend> userFriends = friendRepository.findByUserId(userId);
+        List<Friend> otherUserFriends = friendRepository.findByUserId(otherUserId);
+
+        return userFriends.stream()
+                .filter(friend -> otherUserFriends.stream()
+                        .anyMatch(OF -> OF.getFriendUser().equals(friend.getFriendUser())))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -65,6 +80,7 @@ public class FriendServiceImpl implements FriendService {
         friendRepository.save(newFriend);
     }
 
+    @Override
     public void unfriend(Long userId, Long friendId) {
         // Tìm yêu cầu kết bạn từ userId đến friendId
         Optional<FriendRequest> requestA = friendRequestRepository.findBySenderIdAndReceiverId(userId, friendId);
@@ -139,5 +155,25 @@ public class FriendServiceImpl implements FriendService {
             throw new RuntimeException("User or followed user not found");
         }
     }
+
+    @Override
+    @Transactional
+    public void followUser(Long userId, Long friendUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        User friendUser = userRepository.findById(friendUserId)
+                .orElseThrow(() -> new RuntimeException("Friend user not found with id: " + friendUserId));
+
+        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowed(user, friendUser);
+
+        if (existingFollow.isEmpty()) {
+            Follow follow = new Follow();
+            follow.setFollower(user);
+            follow.setFollowed(friendUser);
+
+            followRepository.save(follow);
+        }
+    }
+
 
 }
