@@ -12,4 +12,6 @@ public interface FriendService {
 
     void unfriend(Long userId, Long friendId);
 
+    void unfollow(Long userId, Long followedId);
+
 }

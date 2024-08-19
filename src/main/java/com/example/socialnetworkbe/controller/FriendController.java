@@ -23,6 +23,7 @@ public class FriendController {
         this.friendRequestService = friendRequestService;
     }
 
+    // gui loi moi ket ban cho nguoi khac
     @PostMapping("/send-request")
     public ResponseEntity<FriendRequest> sendFriendRequest(@RequestParam Long senderId, @RequestParam Long receiverId) {
         try {
@@ -33,6 +34,7 @@ public class FriendController {
         }
     }
 
+    // dong y loi moi ket ban
     @PostMapping("/accept-request")
     public ResponseEntity<?> acceptFriendRequest(@RequestParam Long requestId) {
         try {
@@ -47,6 +49,7 @@ public class FriendController {
         }
     }
 
+    // tu choi loi moi ket ban
     @PostMapping("/reject-request")
     public ResponseEntity<FriendRequest> rejectFriendRequest(@RequestParam Long requestId) {
         try {
@@ -69,6 +72,7 @@ public class FriendController {
     }
 
 
+    // unfriend sau khi da ket ban
     @DeleteMapping("/unfriend")
     public ResponseEntity<String> unfriend(@RequestParam Long userId, @RequestParam Long friendId) {
         try {
@@ -79,4 +83,28 @@ public class FriendController {
         }
     }
 
+
+    // API để hủy follow
+    @DeleteMapping("/unfollow")
+    public ResponseEntity<String> unfollow(@RequestParam Long userId, @RequestParam Long followedId) {
+        try {
+            friendService.unfollow(userId, followedId);
+            return ResponseEntity.ok("Unfollowed successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    //Hủy loi moi ket ban mà mình vừa gửi
+    @DeleteMapping("/cancel-request")
+    public ResponseEntity<String> cancelFriendRequest(
+            @RequestParam Long senderId,
+            @RequestParam Long receiverId) {
+        try {
+            friendRequestService.cancelFriendRequest(senderId, receiverId);
+            return new ResponseEntity<>("Friend request cancelled successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error cancelling friend request", HttpStatus.BAD_REQUEST);
+        }
+    }
 }

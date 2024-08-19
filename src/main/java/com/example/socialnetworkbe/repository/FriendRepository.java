@@ -12,11 +12,13 @@ import java.util.Optional;
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query("SELECT f FROM Friend f WHERE f.user.email = :email OR f.friendUser.email = :email")
+
     List<Friend> findAllByEmail(String email);
+
     Optional<Friend> findByUserAndFriendUser(User user, User friendUser);
 
     boolean existsByUserAndFriendUser(User user, User friendUser);
 
-
     Optional<Friend> findByUserIdAndFriendUserId(Long userId, Long friendId);
+
 }

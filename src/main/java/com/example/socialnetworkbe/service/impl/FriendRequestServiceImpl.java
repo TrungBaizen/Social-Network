@@ -164,6 +164,7 @@ import com.example.socialnetworkbe.repository.UserRepository;
 import com.example.socialnetworkbe.service.FriendRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -174,13 +175,13 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendRequestRepository friendRequestRepository;
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
-    private final FollowRepository followRepository; // Thêm FollowRepository
+    private final FollowRepository followRepository;
 
     @Autowired
     public FriendRequestServiceImpl(FriendRequestRepository friendRequestRepository,
                                     FriendRepository friendRepository,
                                     UserRepository userRepository,
-                                    FollowRepository followRepository) { // Thêm FollowRepository
+                                    FollowRepository followRepository) {
         this.friendRequestRepository = friendRequestRepository;
         this.friendRepository = friendRepository;
         this.userRepository = userRepository;
@@ -221,7 +222,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setSender(sender);
         friendRequest.setReceiver(receiver);
-        friendRequest.setFollow(true); // A follows B
+        friendRequest.setFollow(true);
         friendRequest.setAccepted(false);
 
         friendRequestRepository.save(friendRequest);
@@ -252,7 +253,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 friendRequest.getReceiver(), friendRequest.getSender());
 
         if (!existingFriendA.isPresent() && !existingFriendB.isPresent()) {
-            // Tạo đối tượng Friend cho người gửi (người tạo yêu cầu kết bạn)
+            // tạo đối tượng Friend cho người gửi (người tạo yêu cầu kết bạn)
             Friend userSendRequest = new Friend();
             userSendRequest.setUser(friendRequest.getSender());
             userSendRequest.setFriendUser(friendRequest.getReceiver());
@@ -261,7 +262,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
             friendRepository.save(userSendRequest);
 
-            // Tạo đối tượng Friend cho người nhận (người nhận yêu cầu kết bạn)
+            // tạo đối tượng Friend cho người nhận (người nhận yêu cầu kết bạn)
             Friend userAccept = new Friend();
             userAccept.setUser(friendRequest.getReceiver());
             userAccept.setFriendUser(friendRequest.getSender());
@@ -301,6 +302,50 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
 
+//    @Override
+//    @Transactional
+//    public void cancelFriendRequest(Long senderId, Long receiverId) {
+//        User sender = userRepository.findById(senderId)
+//                .orElseThrow(() -> new RuntimeException("Sender not found with id: " + senderId));
+//        User receiver = userRepository.findById(receiverId)
+//                .orElseThrow(() -> new RuntimeException("Receiver not found with id: " + receiverId));
+//
+//        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findBySenderAndReceiver(sender, receiver);
+//
+//        if (friendRequestOpt.isPresent()) {
+//            friendRequestRepository.delete(friendRequestOpt.get());
+//            System.out.println("Cancelled friend request from " + senderId + " to " + receiverId);
+//        } else {
+//            throw new RuntimeException("Friend request does not exist");
+//        }
+//    }
+
+
+    @Override
+    @Transactional
+    public void cancelFriendRequest(Long senderId, Long receiverId) {
+        // Tìm yêu cầu kết bạn
+        Optional<FriendRequest> requestOpt = friendRequestRepository.findBySenderIdAndReceiverId(senderId, receiverId);
+
+        if (requestOpt.isPresent()) {
+            FriendRequest request = requestOpt.get();
+
+            // Xóa yêu cầu kết bạn
+            friendRequestRepository.delete(request);
+
+            // Xóa hoặc cập nhật mối quan hệ follow
+            Optional<Follow> followOpt = followRepository.findByFollowerIdAndFollowedId(senderId, receiverId);
+
+            followOpt.ifPresent(follow -> {
+                followRepository.delete(follow); // Xóa mối quan hệ follow
+            });
+
+            System.out.println("Cancelled friend request from " + senderId + " to " + receiverId);
+        } else {
+            throw new RuntimeException("Friend request not found");
+        }
+    }
+
     @Override
     public List<FriendRequest> getPendingRequestsForUser(Long userId) {
         return friendRequestRepository.findByReceiverId(userId);
@@ -309,10 +354,5 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     public Optional<FriendRequest> getRequest(Long senderId, Long receiverId) {
         return friendRequestRepository.findBySenderIdAndReceiverId(senderId, receiverId);
-    }
-
-    @Override
-    public void rejectRequest(Long requestId) {
-        friendRequestRepository.deleteById(requestId);
     }
 }

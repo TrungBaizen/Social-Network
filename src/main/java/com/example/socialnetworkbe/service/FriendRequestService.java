@@ -16,5 +16,5 @@ public interface FriendRequestService {
 
     Optional<FriendRequest> getRequest(Long senderId, Long receiverId);
 
-    void rejectRequest(Long requestId);
+    void cancelFriendRequest(Long senderId, Long receiverId);
 }
