@@ -142,6 +142,7 @@ public class PostServiceImpl implements PostService {
     public List<PostLikeCommentDTO> findAllByUserId(Long userId) {
         // Lấy tất cả các bài viết của người dùng
         List<Post> posts = postRepository.findAllByUserId(userId);
+        posts.sort((post1, post2) -> post2.getCreatedAt().compareTo(post1.getCreatedAt()));
         return findAllByPosts(posts);
     }
 
@@ -149,6 +150,7 @@ public class PostServiceImpl implements PostService {
     public List<PostLikeCommentDTO> findAllByFollowing(Long userId) {
         List<Post> posts = postRepository.findAllByFollowerId(userId);
         posts.addAll(postRepository.findAllByUserId(userId));
+        posts.sort((post1, post2) -> post2.getCreatedAt().compareTo(post1.getCreatedAt()));
         return findAllByPosts(posts);
     }
 
