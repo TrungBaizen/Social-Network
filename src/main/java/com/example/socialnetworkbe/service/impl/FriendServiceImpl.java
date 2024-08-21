@@ -142,8 +142,6 @@ public class FriendServiceImpl implements FriendService {
     public void unfollow(Long userId, Long followedId) {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<User> followedOpt = userRepository.findById(followedId);
-
-        // Tìm bản ghi follow từ userId đến followedId
         Optional<Follow> followToDelete = followRepository.findByFollowerIdAndFollowedId(userId, followedId);
 
         if (userOpt.isPresent() && followedOpt.isPresent()) {
@@ -151,7 +149,7 @@ public class FriendServiceImpl implements FriendService {
             User followed = followedOpt.get();
 
 
-            followRepository.delete(followToDelete.get()); // xóa khoi bảng follows
+            followRepository.delete(followToDelete.get());
             System.out.println("Deleted follow from " + userId + " to " + followedId);
 
             // xoa mqh follow giữa 2 người dùng
@@ -166,6 +164,27 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
+//    @Override
+//    @Transactional
+//    public void followUser(Long userId, Long friendUserId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+//        User friendUser = userRepository.findById(friendUserId)
+//                .orElseThrow(() -> new RuntimeException("Friend user not found with id: " + friendUserId));
+//
+//        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowed(user, friendUser);
+//
+//
+//        if (existingFollow.isEmpty()) {
+//            Friend friend = new Friend();
+//            Follow follow = new Follow();
+//            follow.setFollower(user);
+//            follow.setFollowed(friendUser);
+//
+//            followRepository.save(follow);
+//        }
+//    }
+
     @Override
     @Transactional
     public void followUser(Long userId, Long friendUserId) {
@@ -177,13 +196,30 @@ public class FriendServiceImpl implements FriendService {
         Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowed(user, friendUser);
 
         if (existingFollow.isEmpty()) {
+            // Tạo mới mối quan hệ follow
             Follow follow = new Follow();
             follow.setFollower(user);
             follow.setFollowed(friendUser);
-
             followRepository.save(follow);
+
+            // Thiết lập lại trường is_follow thành true trong bảng friends
+            Optional<Friend> friendOpt = friendRepository.findByUserAndFriendUser(user, friendUser);
+
+            if (friendOpt.isPresent()) {
+                Friend friend = friendOpt.get();
+                friend.setFollow(true); // Set lại trường is_follow thành true
+                friendRepository.save(friend);
+            } else {
+                // Nếu không có bản ghi Friend tồn tại, tạo mới một bản ghi
+                Friend newFriend = new Friend();
+                newFriend.setUser(user);
+                newFriend.setFriendUser(friendUser);
+                newFriend.setFollow(true);
+                friendRepository.save(newFriend);
+            }
         }
     }
+
 
 
     @Override
