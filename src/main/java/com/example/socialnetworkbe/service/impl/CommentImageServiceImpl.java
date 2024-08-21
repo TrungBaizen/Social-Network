@@ -18,8 +18,10 @@ public class CommentImageServiceImpl implements CommentImageService {
     }
 
     @Override
-    public void deleteAllByCommentId(Long commentId) {
+    public List<CommentImage> deleteAllByCommentId(Long commentId) {
+        List<CommentImage> images = commentImageRepository.findImageAllByCommentId(commentId);
         commentImageRepository.deleteAllByCommentId(commentId);
+        return images;
     }
 
     @Override
@@ -33,8 +35,8 @@ public class CommentImageServiceImpl implements CommentImageService {
     }
 
     @Override
-    public void saveAll(List<CommentImage> images) {
-        commentImageRepository.saveAll(images);
+    public List<CommentImage> saveAll(List<CommentImage> images) {
+        return commentImageRepository.saveAll(images);
     }
 
     @Override

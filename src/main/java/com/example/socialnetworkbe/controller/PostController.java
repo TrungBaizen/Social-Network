@@ -6,6 +6,7 @@ import com.example.socialnetworkbe.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class PostController {
     public ResponseEntity<Post> deletePost(@PathVariable Long id) {
         return new ResponseEntity<>(postService.delete(id), HttpStatus.OK);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<List<PostLikeCommentDTO>> getAllPostByFollower(@PathVariable Long id) {
         return new ResponseEntity<>(postService.findAllByFollowing(id), HttpStatus.OK);
@@ -54,30 +56,28 @@ public class PostController {
 
     @PostMapping("/likes")
     public ResponseEntity<LikeDTO> likePost(@Validated @RequestBody LikeDTO likeDTO, BindingResult bindingResult) {
-        return new ResponseEntity<>(postService.likePost(likeDTO, bindingResult),HttpStatus.OK);
+        return new ResponseEntity<>(postService.likePost(likeDTO, bindingResult), HttpStatus.OK);
     }
 
     @DeleteMapping("/likes/{likeId}")
     public ResponseEntity<LikeDTO> unlikePost(@PathVariable Long likeId) {
-        return new ResponseEntity<>(postService.deleteLikePost(likeId),HttpStatus.OK);
+        return new ResponseEntity<>(postService.deleteLikePost(likeId), HttpStatus.OK);
     }
 
     @PostMapping("/comments")
-    public ResponseEntity<?> commentPost(@Validated @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
-        postService.commentPost(commentDTO, bindingResult);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<CommentDTO> commentPost(@Validated @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
+        return new ResponseEntity<>(postService.commentPost(commentDTO, bindingResult), HttpStatus.OK);
     }
 
     @PostMapping("/comments/{commentId}")
-    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @Validated @RequestBody CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
-        postService.updateCommentPost(commentId,commentUpdateDTO, bindingResult);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<CommentDTO> updateComment(@PathVariable Long commentId, @Validated @RequestBody CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
+        return new ResponseEntity<>(postService.updateCommentPost(commentId, commentUpdateDTO, bindingResult), HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
-        postService.deleteCommentPost(commentId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Long> deleteComment(@PathVariable Long commentId) {
+        return new ResponseEntity<>(postService.deleteCommentPost(commentId), HttpStatus.OK);
     }
 
 

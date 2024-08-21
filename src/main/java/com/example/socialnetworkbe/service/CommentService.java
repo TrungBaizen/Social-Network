@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentService {
-    Comment save(Comment comment,List<CommentImage> commentImage ,BindingResult bindingResult);
+    Comment save(Comment comment,BindingResult bindingResult);
+    List<CommentImage> saveImage(List<CommentImage> commentImageList ,BindingResult bindingResult);
 
     Comment update(Comment comment,List<CommentImage> commentImage ,Long id, BindingResult bindingResult);
 

@@ -28,13 +28,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment save(Comment comment,List<CommentImage> commentImageList,BindingResult bindingResult) {
+    public Comment save(Comment comment,BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
-        commentImageService.saveAll(commentImageList);
         return commentRepository.save(comment);
+    }
+
+    @Override
+    public List<CommentImage> saveImage(List<CommentImage> commentImageList, BindingResult bindingResult) {
+        return commentImageService.saveAll(commentImageList);
     }
 
     @Override
@@ -78,8 +82,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Comment delete(Long id) {
         Optional<Comment> commentOptional = findById(id);
-        commentRepository.deleteById(id);
+        if (commentOptional.get().getParentCommentId() == null) {
+            List<Comment> childrenComments = commentRepository.findAllByParentCommentId(id);
+            if (!childrenComments.isEmpty()) {
+                for (Comment comment : childrenComments) {
+                    commentImageService.deleteAllByCommentId(comment.getId());
+                }
+                commentRepository.deleteAllByParentCommentId(id);
+            }
+        }
         commentImageService.deleteAllByCommentId(id);
+        commentRepository.deleteById(id);
         return commentOptional.get();
     }
 

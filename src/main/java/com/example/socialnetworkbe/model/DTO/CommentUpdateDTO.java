@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class CommentUpdateDTO {
+    private Long userId;
     private String content;
     private List<CommentImageDTO> commentImages;
 }

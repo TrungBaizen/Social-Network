@@ -226,7 +226,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void commentPost(CommentDTO commentDTO, BindingResult bindingResult) {
+    public CommentDTO commentPost(CommentDTO commentDTO, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
@@ -239,38 +239,56 @@ public class PostServiceImpl implements PostService {
         newComment.setUser(user);
         newComment.setContent(commentDTO.getContent());
         newComment.setParentCommentId(commentDTO.getParentCommentId());
+        Comment comment = commentService.save(newComment, bindingResult);
+        List<CommentImageDTO> commentImageDTOList =
+                (commentDTO.getCommentImages() == null || commentDTO.getCommentImages().isEmpty())
+                        ? new ArrayList<>()
+                        : commentDTO.getCommentImages();
 
-        List<CommentImageDTO> commentImageDTOList = commentDTO.getCommentImages();
         List<CommentImage> commentImageList = new ArrayList<>();
-        for (CommentImageDTO commentImageDTO : commentImageDTOList) {
-            CommentImage commentImage = new CommentImage();
-            commentImage.setComment(newComment);
-            commentImage.setImage(commentImageDTO.getImage());
+        if (!commentImageDTOList.isEmpty()) {
+            for (CommentImageDTO commentImageDTO : commentImageDTOList) {
+                CommentImage commentImage = new CommentImage();
+                commentImage.setComment(newComment);
+                commentImage.setImage(commentImageDTO.getImage());
+                commentImageList.add(commentImage);
+            }
         }
-        Comment comment = commentService.save(newComment, commentImageList, bindingResult);
+        commentService.saveImage(commentImageList,bindingResult);
         Profile profile = profileService.findByUserId(commentDTO.getUserId());
+        return new CommentDTO(comment, profile, commentImageDTOList);
     }
 
     @Override
-    public void deleteCommentPost(Long id) {
-        commentService.delete(id);
+    public Long deleteCommentPost(Long id) {
+        Comment comment = commentService.delete(id);
+        return comment.getId();
     }
 
     @Override
-    public void updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
+    public CommentDTO updateCommentPost(Long id, CommentUpdateDTO commentUpdateDTO, BindingResult bindingResult) {
         if (bindingResult.hasFieldErrors()) {
             List<String> errors = ExceptionHandlerControllerAdvice.getMessageError(bindingResult);
             throw new ValidationException(errors.stream().collect(Collectors.joining("; ")));
         }
         Comment comment = commentService.findById(id).get();
         comment.setContent(commentUpdateDTO.getContent());
-        List<CommentImage> commentImageList = new ArrayList<>();
-        for (CommentImageDTO commentImageDTO : commentUpdateDTO.getCommentImages()) {
-            CommentImage commentImage = new CommentImage();
-            commentImage.setComment(comment);
-            commentImage.setImage(commentImageDTO.getImage());
-        }
-        commentService.update(comment, commentImageList, id, bindingResult);
+        List<CommentImageDTO> commentImageDTOList =
+                (commentUpdateDTO.getCommentImages() == null || commentUpdateDTO.getCommentImages().isEmpty())
+                        ? new ArrayList<>()
+                        : commentUpdateDTO.getCommentImages();
 
+        List<CommentImage> commentImageList = new ArrayList<>();
+        if (!commentImageDTOList.isEmpty()) {
+            for (CommentImageDTO commentImageDTO : commentImageDTOList) {
+                CommentImage commentImage = new CommentImage();
+                commentImage.setComment(comment);
+                commentImage.setImage(commentImageDTO.getImage());
+                commentImageList.add(commentImage);
+            }
+        }
+        Comment commentUpdate = commentService.update(comment, commentImageList, id, bindingResult);
+        Profile profile = profileService.findByUserId(commentUpdateDTO.getUserId());
+        return new CommentDTO(commentUpdate, profile, commentImageDTOList);
     }
 }
