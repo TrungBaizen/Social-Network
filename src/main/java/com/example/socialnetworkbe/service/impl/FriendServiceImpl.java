@@ -1,13 +1,8 @@
 package com.example.socialnetworkbe.service.impl;
 
-import com.example.socialnetworkbe.model.Follow;
-import com.example.socialnetworkbe.model.Friend;
-import com.example.socialnetworkbe.model.FriendRequest;
-import com.example.socialnetworkbe.model.User;
-import com.example.socialnetworkbe.repository.FollowRepository;
-import com.example.socialnetworkbe.repository.FriendRepository;
-import com.example.socialnetworkbe.repository.FriendRequestRepository;
-import com.example.socialnetworkbe.repository.UserRepository;
+import com.example.socialnetworkbe.model.*;
+import com.example.socialnetworkbe.model.DTO.FriendDTO;
+import com.example.socialnetworkbe.repository.*;
 import com.example.socialnetworkbe.service.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +20,7 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final FollowRepository followRepository;
+    private final ProfileRepository profileRepository;
 
 
 
@@ -32,21 +28,34 @@ public class FriendServiceImpl implements FriendService {
     public FriendServiceImpl(FriendRepository friendRepository,
                              UserRepository userRepository,
                              FriendRequestRepository friendRequestRepository,
-                             FollowRepository followRepository) {
+                             FollowRepository followRepository,
+                             ProfileRepository profileRepository
+                             ) {
         this.friendRepository = friendRepository;
         this.userRepository = userRepository;
         this.friendRequestRepository = friendRequestRepository;
         this.followRepository = followRepository;
+        this.profileRepository = profileRepository;
 
     }
 
-
     @Override
     public List<Friend> getListFriend(String email) {
+        return List.of();
+    }
+
+    @Override
+    public List<FriendDTO> getListFriendDTO(String email) {
         Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmail(email));
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            return friendRepository.findByUser(user);
+            List<Friend> friends = friendRepository.findByUser(user);
+
+            return friends.stream().map(friend -> {
+                String friendEmail = friend.getFriendUser().getEmail();
+                Profile friendProfile = profileRepository.findByEmail(friendEmail);
+                return new FriendDTO(friend, friendProfile);
+            }).collect(Collectors.toList());
         }
         throw new RuntimeException("User not found with email: " + email);
     }

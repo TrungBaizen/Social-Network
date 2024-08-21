@@ -153,14 +153,14 @@
 
 package com.example.socialnetworkbe.service.impl;
 
-import com.example.socialnetworkbe.model.Follow;
-import com.example.socialnetworkbe.model.Friend;
-import com.example.socialnetworkbe.model.FriendRequest;
-import com.example.socialnetworkbe.model.User;
+import com.example.socialnetworkbe.model.*;
+import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
+import com.example.socialnetworkbe.model.DTO.UserDTO;
 import com.example.socialnetworkbe.repository.FollowRepository;
 import com.example.socialnetworkbe.repository.FriendRepository;
 import com.example.socialnetworkbe.repository.FriendRequestRepository;
 import com.example.socialnetworkbe.repository.UserRepository;
+import com.example.socialnetworkbe.service.FollowService;
 import com.example.socialnetworkbe.service.FriendRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -168,6 +168,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendRequestServiceImpl implements FriendRequestService {
@@ -177,6 +178,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
+
+
     @Autowired
     public FriendRequestServiceImpl(FriendRequestRepository friendRequestRepository,
                                     FriendRepository friendRepository,
@@ -185,7 +188,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         this.friendRequestRepository = friendRequestRepository;
         this.friendRepository = friendRepository;
         this.userRepository = userRepository;
-        this.followRepository = followRepository; // Thêm FollowRepository
+        this.followRepository = followRepository;
+
     }
 
     @Override
@@ -235,6 +239,10 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         return friendRequest;
     }
+
+
+
+
 
 
     @Override
@@ -302,24 +310,6 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
 
-//    @Override
-//    @Transactional
-//    public void cancelFriendRequest(Long senderId, Long receiverId) {
-//        User sender = userRepository.findById(senderId)
-//                .orElseThrow(() -> new RuntimeException("Sender not found with id: " + senderId));
-//        User receiver = userRepository.findById(receiverId)
-//                .orElseThrow(() -> new RuntimeException("Receiver not found with id: " + receiverId));
-//
-//        Optional<FriendRequest> friendRequestOpt = friendRequestRepository.findBySenderAndReceiver(sender, receiver);
-//
-//        if (friendRequestOpt.isPresent()) {
-//            friendRequestRepository.delete(friendRequestOpt.get());
-//            System.out.println("Cancelled friend request from " + senderId + " to " + receiverId);
-//        } else {
-//            throw new RuntimeException("Friend request does not exist");
-//        }
-//    }
-
 
     @Override
     @Transactional
@@ -346,13 +336,35 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         }
     }
 
-    @Override
-    public List<FriendRequest> getPendingRequestsForUser(Long userId) {
-        return friendRequestRepository.findByReceiverId(userId);
-    }
+//    @Override
+//    public List<FriendRequest> getPendingRequestsForUser(Long userId) {
+//        return friendRequestRepository.findByReceiverId(userId);
+//    }
 
     @Override
-    public Optional<FriendRequest> getRequest(Long senderId, Long receiverId) {
-        return friendRequestRepository.findBySenderIdAndReceiverId(senderId, receiverId);
+    public List<FriendRequestDTO> getPendingRequestsForUser(Long userId) {
+        List<FriendRequest> requests = friendRequestRepository.findByReceiverId(userId);
+
+        return requests.stream().map(request -> {
+            User sender = request.getSender();
+            User receiver = request.getReceiver();
+
+            // Tạo và trả về đối tượng FriendRequestDTO
+            return new FriendRequestDTO(
+                    request.getId(),
+                    sender.getId(),
+                    sender.getEmail(),
+                    sender.getFirstName(), // Đảm bảo có phương thức getter cho firstName
+                    sender.getLastName(),  // Đảm bảo có phương thức getter cho lastName
+                    receiver.getId(),
+                    receiver.getEmail(),
+                    receiver.getFirstName(), // Đảm bảo có phương thức getter cho firstName
+                    receiver.getLastName(),  // Đảm bảo có phương thức getter cho lastName
+                    request.getCreateTime(),
+                    request.getUpdateTime(),
+                    request.isFollow(),
+                    request.isAccepted()
+            );
+        }).collect(Collectors.toList());
     }
 }

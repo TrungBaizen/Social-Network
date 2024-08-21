@@ -25,6 +25,9 @@ import java.util.Set;
     @Column(nullable = false)
     private String confirmPassword;
 
+    private String firstName;
+    private String lastName;
+
     private boolean enabled = false;
 
     // Thêm trường active để theo dõi trạng thái tài khoản
@@ -40,19 +43,23 @@ import java.util.Set;
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles;
 
-    public User(String email, String password, String confirmPassword, Set<Role> roles, boolean active) {
+    public User(String email, String password, String confirmPassword, String firstName, String lastName, Set<Role> roles, boolean active) {
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.roles = roles;
         this.active = active;
     }
 
-    public User(Long id, String email, String password, String confirmPassword, boolean enabled, Set<Role> roles, boolean active) {
+    public User(Long id, String email, String password, String confirmPassword, String firstName, String lastName, boolean enabled, Set<Role> roles, boolean active) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.enabled = enabled;
         this.roles = roles;
         this.active = active;
@@ -101,7 +108,6 @@ import java.util.Set;
         this.enabled = enabled;
     }
 
-    // Getter và Setter cho trường active
     public boolean isActive() {
         return active;
     }
@@ -134,4 +140,19 @@ import java.util.Set;
         this.registrationType = registrationType;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 }

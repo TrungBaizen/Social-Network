@@ -1,5 +1,6 @@
 package com.example.socialnetworkbe.service;
 
+import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
 import com.example.socialnetworkbe.model.FriendRequest;
 
 import java.util.List;
@@ -12,9 +13,7 @@ public interface FriendRequestService {
 
     FriendRequest rejectFriendRequest(Long requestId);
 
-    List<FriendRequest> getPendingRequestsForUser(Long userId);
-
-    Optional<FriendRequest> getRequest(Long senderId, Long receiverId);
+    List<FriendRequestDTO> getPendingRequestsForUser(Long userId);
 
     void cancelFriendRequest(Long senderId, Long receiverId);
 }

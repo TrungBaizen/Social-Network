@@ -18,4 +18,5 @@ public interface ProfileService{
     ProfileDTO getProfile(String email);
     Profile updateImageAvatar(Long id ,String image, BindingResult bindingResult);
     Profile updateImageCover(Long id ,String image, BindingResult bindingResult);
+
 }

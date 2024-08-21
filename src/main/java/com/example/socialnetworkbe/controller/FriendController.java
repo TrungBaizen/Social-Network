@@ -1,8 +1,11 @@
 package com.example.socialnetworkbe.controller;
 
+import com.example.socialnetworkbe.model.DTO.FriendDTO;
+import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
 import com.example.socialnetworkbe.model.Follow;
 import com.example.socialnetworkbe.model.Friend;
 import com.example.socialnetworkbe.model.FriendRequest;
+import com.example.socialnetworkbe.repository.FriendRequestRepository;
 import com.example.socialnetworkbe.service.FriendRequestService;
 import com.example.socialnetworkbe.service.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +22,14 @@ import java.util.Optional;
 public class FriendController {
     private final FriendService friendService;
     private final FriendRequestService friendRequestService;
+    private final FriendRequestRepository friendRequestRepository;
 
     @Autowired
-    public FriendController(FriendService friendService, FriendRequestService friendRequestService) {
+    public FriendController(FriendService friendService, FriendRequestService friendRequestService, FriendRequestRepository friendRequestRepository) {
         this.friendService = friendService;
         this.friendRequestService = friendRequestService;
+        this.friendRequestRepository = friendRequestRepository;
+
     }
 
     // gui loi moi ket ban cho nguoi khac
@@ -68,9 +74,17 @@ public class FriendController {
     }
 
     // list lời mời kết bạn
+//    @GetMapping("/pending-requests")
+//    public ResponseEntity<List<FriendRequest>> getPendingRequestsForUser(@RequestParam Long userId) {
+//        List<FriendRequest> requests = friendRequestService.getPendingRequestsForUser(userId);
+//        return ResponseEntity.ok(requests);
+//    }
+
     @GetMapping("/pending-requests")
-    public ResponseEntity<List<FriendRequest>> getPendingRequestsForUser(@RequestParam Long userId) {
-        List<FriendRequest> requests = friendRequestService.getPendingRequestsForUser(userId);
+    public ResponseEntity<List<FriendRequestDTO>> getPendingRequestsForUser(@RequestParam Long userId) {
+        // Lấy danh sách FriendRequestDTO từ service
+        List<FriendRequestDTO> requests = friendRequestService.getPendingRequestsForUser(userId);
+        // Trả về danh sách DTO
         return ResponseEntity.ok(requests);
     }
 
@@ -112,14 +126,15 @@ public class FriendController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<Friend>> getListFriend(@RequestParam String email) {
+    public ResponseEntity<List<FriendDTO>> getListFriend(@RequestParam String email) {
         try {
-            List<Friend> friends = friendService.getListFriend(email);
+            List<FriendDTO> friends = friendService.getListFriendDTO(email);
             return ResponseEntity.ok(friends);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
 
     // API để lấy danh sách bạn bè chung của hai người dùng
     @GetMapping("/common-friends")

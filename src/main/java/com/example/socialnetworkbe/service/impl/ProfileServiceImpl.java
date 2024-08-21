@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
 
+
+
     private final FriendService friendService;
 
     @Autowired
@@ -72,6 +74,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
 
+
     @Override
     public Optional<Profile> findById(Long id) {
         Optional<Profile> profileOptional = profileRepository.findById(id);
@@ -114,6 +117,7 @@ public class ProfileServiceImpl implements ProfileService {
         ProfileDTO profileDTO = new ProfileDTO(profile,friendDTOList);
         return profileDTO;
     }
+
 
     @Override
     public Profile updateImageAvatar(Long id ,String image, BindingResult bindingResult ) {
