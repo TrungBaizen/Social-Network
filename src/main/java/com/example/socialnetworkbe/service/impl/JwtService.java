@@ -29,6 +29,15 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateTokenLoginOauth2(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + EXPIRE_TIME * 1000))
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken);
@@ -48,7 +57,7 @@ public class JwtService {
         return false;
     }
 
-    public String getUserNameFromJwtToken(String token) {
+    public String getEmailFromJwtToken(String token) {
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)

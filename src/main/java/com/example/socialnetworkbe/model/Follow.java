@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -15,22 +16,18 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Follow {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "followerID", referencedColumnName = "id")
+    @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
 
     @ManyToOne
-    @JoinColumn(name = "followedID", referencedColumnName = "id")
+    @JoinColumn(name = "followed_id", nullable = false)
     private User followed;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

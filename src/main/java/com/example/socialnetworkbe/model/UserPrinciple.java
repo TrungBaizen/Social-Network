@@ -8,30 +8,33 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-//Đại diện cho đối tượng đăng nhập vào
+
+// Đại diện cho đối tượng đăng nhập vào
 public class UserPrinciple implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private Long id;
 
-    private String username;
+    private String email; // Thay đổi từ username thành email
 
     private String password;
 
     private Collection<? extends GrantedAuthority> roles;
 
-    public UserPrinciple(Long id, String username, String password, Collection<? extends GrantedAuthority> roles) {
+    public UserPrinciple(Long id, String email, String password, Collection<? extends GrantedAuthority> roles) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.roles = roles;
     }
 
     public static UserPrinciple build(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
         return new UserPrinciple(
                 user.getId(),
-                user.getUsername(),
+                user.getEmail(), // Lấy email từ đối tượng User
                 user.getPassword(),
                 authorities
         );
@@ -43,7 +46,7 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email; // Trả về email thay vì username
     }
 
     @Override
@@ -55,7 +58,6 @@ public class UserPrinciple implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
-
 
     @Override
     public boolean isAccountNonExpired() {
@@ -88,6 +90,6 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(id);
     }
 }
