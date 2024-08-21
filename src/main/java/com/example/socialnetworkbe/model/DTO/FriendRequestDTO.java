@@ -43,4 +43,6 @@ public class FriendRequestDTO {
         this.follow = follow;
         this.accepted = accepted;
     }
+
+
 }

@@ -21,4 +21,7 @@ public interface FriendService {
 
     void followUser(Long userId, Long friendUserId);
 
+    boolean areFriends(Long senderId, Long receiverId);
+    boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId);
+    boolean isFollowing(Long userId, Long friendUserId);
 }

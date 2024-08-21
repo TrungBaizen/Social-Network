@@ -2,6 +2,7 @@ package com.example.socialnetworkbe.service.impl;
 
 
 import com.example.socialnetworkbe.model.DTO.FriendDTO;
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.DTO.ProfileDTO;
 import com.example.socialnetworkbe.model.Friend;
 import com.example.socialnetworkbe.model.Profile;

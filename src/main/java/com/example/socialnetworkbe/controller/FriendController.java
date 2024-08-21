@@ -2,6 +2,7 @@ package com.example.socialnetworkbe.controller;
 
 import com.example.socialnetworkbe.model.DTO.FriendDTO;
 import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.Follow;
 import com.example.socialnetworkbe.model.Friend;
 import com.example.socialnetworkbe.model.FriendRequest;
@@ -162,4 +163,14 @@ public class FriendController {
     }
 
 
+
+    @GetMapping("/check-friendship")
+    public boolean checkFriendship(@RequestParam Long senderId, @RequestParam Long receiverId) {
+        return friendService.areFriends(senderId, receiverId);
+    }
+
+    @GetMapping("/check-follow")
+    public boolean checkFollow(@RequestParam Long userId, @RequestParam Long friendUserId) {
+        return friendService.isFollowing(userId, friendUserId);
+    }
 }

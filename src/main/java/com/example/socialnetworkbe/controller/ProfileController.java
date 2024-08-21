@@ -1,5 +1,6 @@
 package com.example.socialnetworkbe.controller;
 
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.DTO.ProfileDTO;
 import com.example.socialnetworkbe.model.Profile;
 import com.example.socialnetworkbe.service.ProfileService;

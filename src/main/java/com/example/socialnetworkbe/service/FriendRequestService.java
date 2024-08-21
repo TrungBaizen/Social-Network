@@ -1,6 +1,7 @@
 package com.example.socialnetworkbe.service;
 
 import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.FriendRequest;
 
 import java.util.List;

@@ -2,6 +2,7 @@ package com.example.socialnetworkbe.service.impl;
 
 import com.example.socialnetworkbe.model.*;
 import com.example.socialnetworkbe.model.DTO.FriendDTO;
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.repository.*;
 import com.example.socialnetworkbe.service.FriendService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,4 +186,18 @@ public class FriendServiceImpl implements FriendService {
     }
 
 
+    @Override
+    public boolean areFriends(Long senderId, Long receiverId) {
+        return friendRepository.areFriends(senderId, receiverId);
+    }
+
+    @Override
+    public boolean existsBySenderIdAndReceiverId(Long senderId, Long receiverId) {
+        return friendRepository.existsBySenderIdAndReceiverId(senderId, receiverId);
+    }
+
+    @Override
+    public boolean isFollowing(Long userId, Long friendUserId) {
+        return friendRepository.isFollowing(userId, friendUserId);
+    }
 }

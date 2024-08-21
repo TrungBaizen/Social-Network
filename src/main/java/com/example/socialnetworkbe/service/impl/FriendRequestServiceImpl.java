@@ -155,6 +155,7 @@ package com.example.socialnetworkbe.service.impl;
 
 import com.example.socialnetworkbe.model.*;
 import com.example.socialnetworkbe.model.DTO.FriendRequestDTO;
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.DTO.UserDTO;
 import com.example.socialnetworkbe.repository.FollowRepository;
 import com.example.socialnetworkbe.repository.FriendRepository;
@@ -162,6 +163,8 @@ import com.example.socialnetworkbe.repository.FriendRequestRepository;
 import com.example.socialnetworkbe.repository.UserRepository;
 import com.example.socialnetworkbe.service.FollowService;
 import com.example.socialnetworkbe.service.FriendRequestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -173,6 +176,7 @@ import java.util.stream.Collectors;
 @Service
 public class FriendRequestServiceImpl implements FriendRequestService {
 
+    private static final Logger log = LoggerFactory.getLogger(FriendRequestServiceImpl.class);
     private final FriendRequestRepository friendRequestRepository;
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
@@ -354,12 +358,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                     request.getId(),
                     sender.getId(),
                     sender.getEmail(),
-                    sender.getFirstName(), // Đảm bảo có phương thức getter cho firstName
-                    sender.getLastName(),  // Đảm bảo có phương thức getter cho lastName
+                    sender.getFirstName(),
+                    sender.getLastName(),
                     receiver.getId(),
                     receiver.getEmail(),
-                    receiver.getFirstName(), // Đảm bảo có phương thức getter cho firstName
-                    receiver.getLastName(),  // Đảm bảo có phương thức getter cho lastName
+                    receiver.getFirstName(),
+                    receiver.getLastName(),
                     request.getCreateTime(),
                     request.getUpdateTime(),
                     request.isFollow(),
@@ -367,4 +371,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             );
         }).collect(Collectors.toList());
     }
+
+
+
 }

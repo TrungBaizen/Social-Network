@@ -1,5 +1,6 @@
 package com.example.socialnetworkbe.service;
 
+import com.example.socialnetworkbe.model.DTO.FriendshipStatusDTO;
 import com.example.socialnetworkbe.model.DTO.ProfileDTO;
 import com.example.socialnetworkbe.model.Profile;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,5 +19,4 @@ public interface ProfileService{
     ProfileDTO getProfile(String email);
     Profile updateImageAvatar(Long id ,String image, BindingResult bindingResult);
     Profile updateImageCover(Long id ,String image, BindingResult bindingResult);
-
 }
