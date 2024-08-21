@@ -74,13 +74,6 @@ public class FriendController {
         }
     }
 
-    // list lời mời kết bạn
-//    @GetMapping("/pending-requests")
-//    public ResponseEntity<List<FriendRequest>> getPendingRequestsForUser(@RequestParam Long userId) {
-//        List<FriendRequest> requests = friendRequestService.getPendingRequestsForUser(userId);
-//        return ResponseEntity.ok(requests);
-//    }
-
     @GetMapping("/pending-requests")
     public ResponseEntity<List<FriendRequestDTO>> getPendingRequestsForUser(@RequestParam Long userId) {
         // Lấy danh sách FriendRequestDTO từ service
@@ -172,5 +165,15 @@ public class FriendController {
     @GetMapping("/check-follow")
     public boolean checkFollow(@RequestParam Long userId, @RequestParam Long friendUserId) {
         return friendService.isFollowing(userId, friendUserId);
+    }
+
+
+    @GetMapping("/has-sent-request")
+    public ResponseEntity<Boolean> hasSentFriendRequest(
+            @RequestParam Long senderId,
+            @RequestParam Long receiverId) {
+
+        boolean hasSent = friendRequestService.hasSentFriendRequest(senderId, receiverId);
+        return ResponseEntity.ok(hasSent);
     }
 }

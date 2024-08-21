@@ -164,26 +164,6 @@ public class FriendServiceImpl implements FriendService {
         }
     }
 
-//    @Override
-//    @Transactional
-//    public void followUser(Long userId, Long friendUserId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-//        User friendUser = userRepository.findById(friendUserId)
-//                .orElseThrow(() -> new RuntimeException("Friend user not found with id: " + friendUserId));
-//
-//        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowed(user, friendUser);
-//
-//
-//        if (existingFollow.isEmpty()) {
-//            Friend friend = new Friend();
-//            Follow follow = new Follow();
-//            follow.setFollower(user);
-//            follow.setFollowed(friendUser);
-//
-//            followRepository.save(follow);
-//        }
-//    }
 
     @Override
     @Transactional

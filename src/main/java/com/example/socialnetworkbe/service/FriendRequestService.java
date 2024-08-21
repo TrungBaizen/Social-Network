@@ -17,4 +17,6 @@ public interface FriendRequestService {
     List<FriendRequestDTO> getPendingRequestsForUser(Long userId);
 
     void cancelFriendRequest(Long senderId, Long receiverId);
+
+    boolean hasSentFriendRequest(Long senderId, Long receiverId);
 }
